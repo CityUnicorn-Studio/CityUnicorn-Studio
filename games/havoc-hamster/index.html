@@ -1,0 +1,2764 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1e272e" />
+    <title>🐹 Hamster Havoc - Optimized</title>
+    
+    <!-- External dependencies MUST come first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            touch-action: none;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+            font-family: "Arial", sans-serif;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: #3a7a3a;
+            overflow: hidden;
+        }
+
+        #game-wrapper canvas {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            color: white;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            pointer-events: none;
+            line-height: 1.4;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        #ui .level-badge,
+        #ui .cheese-count {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 2px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(2px);
+        }
+
+        #scoreUI {
+            position: absolute;
+            top: 10px;
+            left: 60%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .score-box {
+            background: rgba(30, 30, 30, 0.75);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-family: sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
+            min-width: 80px;
+        }
+
+        .score-box .label {
+            font-size: 9px;
+            color: #aaa;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .score-box .value {
+            color: #ffd700;
+            font-size: 16px;
+            margin-top: 2px;
+        }
+
+        .floating-text {
+            position: absolute;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 101;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(1.3); opacity: 0; }
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.75);
+            text-align: center;
+            font-size: 13px;
+            pointer-events: none;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 4px 14px;
+            border-radius: 30px;
+            backdrop-filter: blur(2px);
+            white-space: nowrap;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            z-index: 90;
+        }
+
+        #joystick {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            touch-action: none;
+            display: none;
+            z-index: 80;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        #joystickKnob {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 200, 100, 0.85);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 220, 150, 0.3);
+            transition: none;
+        }
+
+        #leftJoystick {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            touch-action: none;
+            display: none;
+            z-index: 80;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        #leftJoystickKnob {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(100, 200, 255, 0.85);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(150, 220, 255, 0.3);
+            transition: none;
+        }
+
+        #zoomControls {
+            position: absolute;
+            bottom: 200px;
+            right: 12px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 85;
+            align-items: center;
+        }
+
+        .zoom-btn {
+            background: rgba(0, 0, 0, 0.55);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            transition: transform 0.15s, background 0.2s;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.88);
+            background: rgba(255, 200, 100, 0.3);
+        }
+
+        #zoomLabel {
+            background: rgba(0, 0, 0, 0.45);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            backdrop-filter: blur(2px);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        @media (max-height: 600px) {
+            #zoomControls { bottom: 160px; }
+            .zoom-btn { width: 36px; height: 36px; font-size: 16px; }
+        }
+
+        @media (orientation: landscape) {
+            #joystick { bottom: 12%; left: auto; right: 8%; transform: none; }
+            #leftJoystick { bottom: 12%; left: 8%; transform: none; }
+        }
+
+        #powerUpUI {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 51, 0, 0.92);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 24px;
+            font-weight: bold;
+            font-size: 15px;
+            display: none;
+            z-index: 150;
+            pointer-events: none;
+            box-shadow: 0 4px 20px rgba(255, 51, 0, 0.6);
+            font-family: sans-serif;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 200, 100, 0.3);
+            backdrop-filter: blur(2px);
+            letter-spacing: 0.5px;
+        }
+        #powerUpUI.active { animation: pulseGlow 0.8s infinite alternate; }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 4px 15px rgba(255, 51, 0, 0.5); }
+            100% { box-shadow: 0 4px 35px rgba(255, 51, 0, 0.9); }
+        }
+
+        #saveLoadContainer {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: none;
+            z-index: 110;
+            gap: 8px;
+            flex-direction: column;
+        }
+        .icon-btn {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            transition: transform 0.1s, background 0.2s;
+            padding: 0;
+            line-height: 1;
+            backdrop-filter: blur(2px);
+        }
+        .icon-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.25); }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            text-align: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        #startMenu {
+            background: linear-gradient(135deg, #1e3c1e 0%, #3a7a3a 100%);
+            z-index: 300;
+        }
+        .studio-text {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #ffd700;
+            margin-bottom: 4px;
+            font-weight: bold;
+            opacity: 0.9;
+        }
+        .game-title {
+            font-size: 38px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 200, 100, 0.5);
+            animation: titlePulse 2.5s infinite ease-in-out;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 15px rgba(255, 200, 100, 0.5); }
+            50% { transform: scale(1.03); text-shadow: 0 0 30px rgba(255, 200, 100, 0.8); }
+        }
+
+        .menu-btn {
+            padding: 13px 34px;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 35px;
+            cursor: pointer;
+            border: none;
+            margin: 7px;
+            min-width: 200px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s, filter 0.2s;
+        }
+        .btn-green { background: #4caf50; color: white; }
+        .btn-orange { background: #ff8c00; color: white; }
+        .btn-blue { background: #2196f3; color: white; font-size: 14px; padding: 10px 24px; }
+        .menu-btn:active { transform: scale(0.95); }
+
+        #licensingModal {
+            position: absolute;
+            background: #141e14;
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 92%;
+            width: 420px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            z-index: 350;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            text-align: left;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+        #licensingModal h3 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 14px;
+            font-size: 19px;
+            flex-shrink: 0;
+        }
+        .legal-text-area {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
+        .close-modal-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            align-self: center;
+            margin-top: 14px;
+            cursor: pointer;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        #levelSelect {
+            background: linear-gradient(135deg, #1a2a1a 0%, #2d5a2d 100%);
+            z-index: 250;
+        }
+        #levelSelect h2 { color: #ffd700; margin-bottom: 18px; font-size: 24px; }
+        #levelGrid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 320px;
+        }
+        .level-btn {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            border: 2px solid #ffd700;
+            background: #2d5a2d;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+        .level-btn:active { transform: scale(0.94); }
+        .level-btn.unlocked { background: #4caf50; }
+        .level-btn.locked {
+            background: #1a2a1a;
+            border-color: #555;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .level-btn.current {
+            box-shadow: 0 0 0 3px #ffd700, 0 4px 16px rgba(255, 215, 0, 0.5);
+            transform: scale(1.06);
+        }
+
+        #optionsMenu {
+            background: linear-gradient(135deg, #1a2a1a 0%, #2d5a2d 100%);
+            z-index: 250;
+        }
+        .option-container {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 10px;
+        }
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .option-row:last-child { margin-bottom: 0; }
+        .slider-wrapper { display: flex; align-items: center; gap: 10px; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 120px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        }
+        .slider-val { color: #ffd700; font-weight: bold; min-width: 40px; text-align: right; }
+        .toggle-checkbox {
+            width: 44px;
+            height: 24px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .toggle-checkbox:checked { background: #4caf50; }
+        .toggle-checkbox::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        .toggle-checkbox:checked::before { transform: translateX(20px); }
+        input:disabled, .slider-val.disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #levelClearModal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #levelClearModal .modal-content {
+            background: #1a3c10;
+            border: 3px solid #ffd700;
+            border-radius: 16px;
+            padding: 28px 22px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+            width: 92%;
+            max-width: 340px;
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        #levelClearModal h2 {
+            color: #ffd700;
+            font-size: 26px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+        }
+        #levelClearModal p {
+            font-size: 16px;
+            margin-bottom: 18px;
+            color: #e0e0e0;
+            line-height: 1.4;
+        }
+        .next-level-btn {
+            background: #ffd700;
+            color: #1a3c10;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 24px;
+            font-weight: bold;
+            font-size: 17px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b39700;
+            transition: transform 0.1s;
+        }
+        .next-level-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b39700;
+        }
+
+        #gameOverlay h2 {
+            font-size: 30px;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(255, 100, 100, 0.7);
+        }
+        #gameOverlay p {
+            font-size: 17px;
+            margin-bottom: 22px;
+            max-width: 85%;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        #winOverlay h2 {
+            text-shadow: 0 0 20px rgba(100, 255, 100, 0.6);
+            color: #90ee90;
+            font-size: 30px;
+        }
+        #winOverlay p {
+            font-size: 17px;
+            margin-bottom: 22px;
+            max-width: 85%;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+
+        #licensingModal::-webkit-scrollbar { width: 5px; }
+        #licensingModal::-webkit-scrollbar-track { background: #0a0f0a; border-radius: 3px; }
+        #licensingModal::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 3px; }
+
+        @media (max-width: 500px) {
+            .game-title { font-size: 28px; }
+            .menu-btn { padding: 11px 26px; font-size: 15px; min-width: 160px; }
+            #ui { font-size: 15px; top: 8px; left: 10px; }
+            #joystick, #leftJoystick { width: 100px; height: 100px; bottom: 60px; }
+            #joystickKnob, #leftJoystickKnob { width: 42px; height: 42px; }
+            #powerUpUI { font-size: 13px; padding: 6px 14px; bottom: 170px; }
+            .level-btn { width: 46px; height: 46px; font-size: 14px; }
+            #levelSelect h2 { font-size: 20px; }
+            #levelGrid { gap: 8px; max-width: 270px; }
+            .option-container { padding: 15px; }
+            .option-row { font-size: 14px; }
+            input[type="range"] { width: 90px; }
+        }
+        @media (max-height: 600px) {
+            #controls { font-size: 11px; bottom: 12px; padding: 2px 12px; }
+            #joystick, #leftJoystick { width: 80px; height: 80px; bottom: 48px; }
+            #joystickKnob, #leftJoystickKnob { width: 34px; height: 34px; }
+            #powerUpUI { font-size: 12px; padding: 4px 12px; bottom: 140px; }
+            #ui { font-size: 13px; top: 6px; left: 8px; }
+            .icon-btn { width: 36px; height: 36px; font-size: 16px; }
+            .game-title { font-size: 28px; }
+            .menu-btn { padding: 10px 22px; font-size: 14px; min-width: 140px; }
+        }
+
+        @media (orientation: landscape) {
+            #joystick { display: none; }
+            #leftJoystick { display: none; }
+        }
+        @media (orientation: portrait) {
+            #leftJoystick { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <audio id="bg-music" loop>
+        <source src="openmindaudio-playful-cartoon-background-music-sidewalk-shuffle-528928.mp3" type="audio/mpeg" />
+    </audio>
+
+    <div id="game-wrapper">
+        <div id="ui" style="display: none">
+            <div>
+                <span class="level-badge">🐹 <b>Level <span id="level">1</span></b></span>
+            </div>
+            <div style="margin-top: 4px">
+                <span class="cheese-count">🪙 <span id="score">0</span>/<span id="targetScore">5</span></span>
+            </div>
+            <div style="font-size: 11px; margin-top: 6px; opacity: 0.85; background: rgba(0, 0, 0, 0.3); padding: 2px 10px; border-radius: 12px; display: inline-block;">
+                Find all coins! Watch out for stealth cats! 🙀
+            </div>
+        </div>
+
+        <div id="scoreUI" style="display: none">
+            <div class="score-box">
+                <span class="label">Score</span>
+                <span id="scoreDisplay" class="value">0</span>
+            </div>
+            <div class="score-box">
+                <span class="label">Best</span>
+                <span id="highScoreDisplay" class="value">0</span>
+            </div>
+        </div>
+
+        <div id="floatingTextContainer"></div>
+
+        <div id="controls" style="display: none">
+            Drag joystick to move • Avoid the walls &amp; the cats!
+        </div>
+
+        <div id="joystick"><div id="joystickKnob"></div></div>
+        <div id="leftJoystick"><div id="leftJoystickKnob"></div></div>
+
+        <div id="zoomControls" style="display: none">
+            <button id="zoomOutBtn" class="zoom-btn" title="Zoom Out">🔍−</button>
+            <button id="zoomInBtn" class="zoom-btn" title="Zoom In">🔍+</button>
+            <div id="zoomLabel">Medium</div>
+        </div>
+
+        <div id="powerUpUI">
+            ⚡ NITRO MODE: <span id="powerUpTimer">8.0</span>s
+        </div>
+
+        <div id="saveLoadContainer">
+            <button id="toggleSoundBtn" class="icon-btn" title="Toggle Sound">🔊</button>
+            <button id="returnToMenuBtn" class="icon-btn" title="Return to menu">🏠</button>
+        </div>
+
+        <div id="levelSelect" class="overlay" style="display: none">
+            <h2>🗺️ Select Level</h2>
+            <div id="levelGrid"></div>
+            <button id="backToMenuBtn" class="menu-btn btn-blue" style="margin-top: 22px; min-width: 140px;">
+                ↩️ Back
+            </button>
+        </div>
+
+        <div id="optionsMenu" class="overlay" style="display: none">
+            <h2 style="color: #ffd700; margin-bottom: 20px; font-size: 28px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
+                ⚙️ Game Options
+            </h2>
+
+            <div class="option-container">
+                <div class="option-row">
+                    <label for="practiceModeToggle">Practice Mode (Ultra Slow)</label>
+                    <input type="checkbox" id="practiceModeToggle" class="toggle-checkbox" />
+                </div>
+
+                <div class="option-row">
+                    <label for="hamsterSpeedSlider">Hamster Speed</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="hamsterSpeedSlider" min="0.5" max="2.0" step="0.1" value="1.0" />
+                        <span id="hamsterSpeedVal" class="slider-val">1.0x</span>
+                    </div>
+                </div>
+
+                <div class="option-row">
+                    <label for="catSpeedSlider">Stealth Cats Speed</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="catSpeedSlider" min="0.5" max="2.0" step="0.1" value="1.0" />
+                        <span id="catSpeedVal" class="slider-val">1.0x</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="backToMenuFromOptionsBtn" class="menu-btn btn-blue" style="margin-top: 24px; min-width: 180px;">
+                ↩️ Back to Menu
+            </button>
+        </div>
+
+        <div id="startMenu" class="overlay">
+            <div class="studio-text">CityUnicorn Studio Presents</div>
+            <h1 class="game-title">Hamster Havoc 🐹✨</h1>
+            <button id="startPlayBtn" class="menu-btn btn-green">🎮 Start Game</button>
+            <button id="openOptionsBtn" class="menu-btn btn-orange">⚙️ Game Options</button>
+            <button id="openLicensingBtn" class="menu-btn btn-blue">📜 Licensing Info</button>
+            <div style="font-size: 11px; margin-top: 30px; opacity: 0.4">v1.0 • Mobile Edition</div>
+        </div>
+
+        <div id="licensingModal">
+            <h3>Legal &amp; Licensing Terms</h3>
+            <div class="legal-text-area">
+Scroll down for full open-source license texts.
+
+OWNERSHIP & COPYRIGHT
+Hamster Havoc source code, game logic, branding, art assets, and design configurations are the sole property of CityUnicorn Studio.
+
+Copyright © 2026 CityUnicorn Studio. All Rights Reserved. Unauthorized duplication, modification, or redistribution of this application or its custom 3D assets is strictly prohibited.
+
+---------------------------------------
+THIRD-PARTY OPEN-SOURCE LICENSES
+---------------------------------------
+This application uses the following open-source software component:
+
+• Three.js 3D Library
+  Copyright (c) 2010-present three.js authors
+  Project Source: https://github.com/mrdoob/three.js
+  License: https://github.com/mrdoob/three.js/blob/master/LICENSE
+
+Distributed under the terms of the MIT License below:
+
+--- THE MIT LICENSE TEXT ---
+
+Copyright (c) 2010-present three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+            </div>
+            <button id="closeLicensingBtn" class="close-modal-btn">Close</button>
+        </div>
+
+        <div id="levelClearModal">
+            <div class="modal-content">
+                <h2>🎉 Level Cleared!</h2>
+                <p id="levelClearText">Amazing job! Get ready for the next challenge...</p>
+                <button class="next-level-btn" onclick="continueToNextLevel()">Continue</button>
+            </div>
+        </div>
+
+        <div id="gameOverlay" class="overlay" style="display: none">
+            <h2>🙀 Game Over!</h2>
+            <p>A stealth cat caught you! Better luck next time, little hamster. 🐹</p>
+            <button id="restartBtn" class="menu-btn btn-green" style="background: #ff6b6b;">🔄 Try Again</button>
+        </div>
+
+        <div id="winOverlay" class="overlay" style="display: none">
+            <h2>🎉 Ultimate Victory!</h2>
+            <p>You conquered all 10 levels, gathered every coin, and outsmarted the invisible stealth cat gang! Amazing job, hamster hero! 🪙🐹</p>
+            <button id="restartBtnWin" class="menu-btn btn-green" style="background: #4caf50;">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        // ─── 🎵 THE PAW GLOW SOUND ENGINE 🎵 ───
+        class SoundEngine {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.isReady = false;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.isReady) {
+                    if (this.ctx.state === "suspended") this.ctx.resume();
+                    this.isReady = true;
+                }
+            }
+
+            setEnabled(enabled) {
+                this.enabled = enabled;
+                if (!enabled && this.isReady) {
+                    this.ctx.suspend();
+                } else if (enabled && this.isReady) {
+                    this.ctx.resume();
+                }
+            }
+
+            play(type, freq, duration, volume = 0.1) {
+                if (!this.isReady || !this.enabled) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            }
+
+            collect() { this.play("sine", 880, 0.15, 0.1); }
+
+            powerup() {
+                if (!this.isReady || !this.enabled) return;
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = "sine";
+                    osc.frequency.value = freq;
+                    const startTime = now + i * 0.08;
+                    gain.gain.setValueAtTime(0.1, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.3);
+                });
+            }
+
+            gameOver() {
+                if (!this.isReady || !this.enabled) return;
+                const now = this.ctx.currentTime;
+                [300, 250, 150, 50].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = "sawtooth";
+                    osc.frequency.setValueAtTime(freq, now + i * 0.2);
+                    gain.gain.setValueAtTime(0.1, now + i * 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.2 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.2);
+                    osc.stop(now + i * 0.2 + 0.3);
+                });
+            }
+
+            victoryKazoo() {
+                if (!this.isReady || !this.enabled) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = "sawtooth";
+                const now = this.ctx.currentTime;
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.linearRampToValueAtTime(350, now + 0.1);
+                osc.frequency.linearRampToValueAtTime(500, now + 0.2);
+                osc.frequency.linearRampToValueAtTime(200, now + 0.4);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            playScurry(speedFactor) {
+                if (!this.isReady || !this.enabled) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(600 + speedFactor * 400, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.04);
+            }
+
+            detected() {
+                if (!this.isReady || !this.enabled) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = "square";
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(1500, now + 0.15);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.18);
+            }
+        }
+
+        const sfx = new SoundEngine();
+        let soundEnabled = true;
+
+        // 🎵 AUDIO AUTO-PLAY UNLOCK (Fixes iOS/Android restrictions)
+        const unlockAudio = () => {
+            if (sfx.ctx && sfx.ctx.state === 'suspended') {
+                sfx.ctx.resume().then(() => {
+                    window.removeEventListener('touchstart', unlockAudio);
+                    window.removeEventListener('click', unlockAudio);
+                });
+            }
+        };
+        window.addEventListener('touchstart', unlockAudio, { passive: true });
+        window.addEventListener('click', unlockAudio, { passive: true });
+
+        // ─── 🐱 STEALTH CAT PROXIMITY RADAR ───
+        let catWarningSoundPlaying = false;
+        let lastBeepTime = 0;
+        const MAX_DANGER_DISTANCE = 5.0;
+        const MAX_DANGER_DISTANCE_SQUARED = MAX_DANGER_DISTANCE * MAX_DANGER_DISTANCE;
+        const MIN_DANGER_DISTANCE = 1.0;
+        const MIN_DANGER_DISTANCE_SQUARED = MIN_DANGER_DISTANCE * MIN_DANGER_DISTANCE;
+
+        function updateProximityAudio(player, enemyList, currentTime) {
+            if (!enemyList || enemyList.length === 0 || !soundEnabled) return;
+            let closestDistanceSquared = Infinity;
+            for (let i = 0; i < enemyList.length; i++) {
+                const dx = player.position.x - enemyList[i].position.x;
+                const dz = player.position.z - enemyList[i].position.z;
+                const distSq = dx * dx + dz * dz; // Squared distance optimization
+                if (distSq < closestDistanceSquared) {
+                    closestDistanceSquared = distSq;
+                }
+            }
+            if (closestDistanceSquared < MAX_DANGER_DISTANCE_SQUARED) {
+                if (!catWarningSoundPlaying) {
+                    catWarningSoundPlaying = true;
+                    lastBeepTime = currentTime;
+                    triggerWarningBeep(currentTime);
+                } else {
+                    const dangerRatio = 1 -
+                        (closestDistanceSquared - MIN_DANGER_DISTANCE_SQUARED) /
+                        (MAX_DANGER_DISTANCE_SQUARED - MIN_DANGER_DISTANCE_SQUARED);
+                    const clampedRatio = Math.max(0, Math.min(1, dangerRatio));
+                    const dynamicInterval = 800 - clampedRatio * 650;
+                    if (currentTime - lastBeepTime > dynamicInterval) {
+                        triggerWarningBeep(currentTime);
+                        lastBeepTime = currentTime;
+                    }
+                }
+            } else {
+                catWarningSoundPlaying = false;
+            }
+        }
+
+        function triggerWarningBeep(currentTime) {
+            if (!sfx.isReady || document.hidden || !soundEnabled) return;
+            const osc = sfx.ctx.createOscillator();
+            const gainNode = sfx.ctx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(sfx.ctx.destination);
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(120, sfx.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(60, sfx.ctx.currentTime + 0.15);
+            gainNode.gain.setValueAtTime(0, sfx.ctx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.25, sfx.ctx.currentTime + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, sfx.ctx.currentTime + 0.2);
+            osc.start(sfx.ctx.currentTime);
+            osc.stop(sfx.ctx.currentTime + 0.25);
+        }
+
+        // ─── 🚀 OBJECT POOLS (Zero GC!) ───
+        const sharedParticleGeo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+        const sharedParticleMat = new THREE.MeshBasicMaterial({
+            color: 0xffd700,
+            transparent: true,
+            depthWrite: false
+        });
+        const particlePool = [];
+        const MAX_PARTICLES = 100;
+
+        function getParticle() {
+            const p = particlePool.pop();
+            if (p) {
+                p.visible = true;
+                p.material.opacity = 1;
+                p.scale.set(1, 1, 1);
+                return p;
+            }
+            return new THREE.Mesh(sharedParticleGeo, sharedParticleMat);
+        }
+
+        function releaseParticle(p) {
+            p.visible = false;
+            scene.remove(p);
+            if (particlePool.length < MAX_PARTICLES) {
+                particlePool.push(p);
+            }
+        }
+
+        const sharedBurstGeo = new THREE.SphereGeometry(1.5, 8, 8);
+
+        // ─── GAME VARIABLES ───
+        let scene, camera, renderer, hamster, maze = [];
+        let moveForward = 0, moveRight = 0;
+        let lastStepTime = 0;
+        let hamsterSpeed = 0.08;
+        let score = 0;
+        let cheeses = [];
+        let buildings = [];
+        let gameOver = false;
+        let gameStarted = false;
+        let currentLevel = 1;
+        let levelClearPending = false;
+        let totalCheesesInLevel = 5;
+
+        let totalScore = 0;
+        let highScore = parseInt(localStorage.getItem("pawGlowHighScore")) || 0;
+
+        const CITY_SAFE_RADIUS = 85;
+        let boundaryFox = null;
+        let isFoxActive = false;
+        let isGameOverTriggered = false;
+
+        let zoomLevel = 1;
+        const zoomConfigs = {
+            0: { height: 60, distance: 50, label: "Far" },
+            1: { height: 45, distance: 35, label: "Medium" },
+            2: { height: 32, distance: 22, label: "Close" },
+        };
+        let isTransitioning = false;
+
+        let powerUpActive = false;
+        let powerUpTimer = 0;
+        let powerUpPulse = 0;
+        const POWERUP_DURATION = 8000;
+        const BASE_HAMSTER_SPEED = 0.08;
+        const BONUS_HAMSTER_SPEED = 0.13;
+
+        let cats = [];
+        let activeParticles = [];
+        let trailParticles = [];
+        let catSpeed = 0.35;
+        let catChaseDelay = 2000;
+        let catStartTime = null;
+
+        // ─── 🐱 GUARD CAT SYSTEM (Outside City Patrol) ───
+        const guardCats = [];
+        const balls = [];
+        let alarmActive = false;
+
+        const GUARD_CAT_CONFIG = {
+            5:  { count: 1, speed: 0.30, searchTime: 4000,  retreatSpeed: 0.20 },
+            6:  { count: 1, speed: 0.33, searchTime: 4500,  retreatSpeed: 0.22 },
+            7:  { count: 2, speed: 0.35, searchTime: 4500,  retreatSpeed: 0.24 },
+            8:  { count: 2, speed: 0.38, searchTime: 5000,  retreatSpeed: 0.25 },
+            9:  { count: 2, speed: 0.40, searchTime: 5000,  retreatSpeed: 0.26 },
+            10: { count: 3, speed: 0.42, searchTime: 5500,  retreatSpeed: 0.28 },
+            11: { count: 3, speed: 0.45, searchTime: 6000,  retreatSpeed: 0.30 },
+            12: { count: 3, speed: 0.48, searchTime: 6500,  retreatSpeed: 0.32 },
+            13: { count: 4, speed: 0.50, searchTime: 7000,  retreatSpeed: 0.34 },
+            14: { count: 4, speed: 0.53, searchTime: 7500,  retreatSpeed: 0.36 },
+            15: { count: 4, speed: 0.55, searchTime: 8000,  retreatSpeed: 0.38 },
+        };
+
+        function getGuardConfig(level) {
+            return GUARD_CAT_CONFIG[level] || GUARD_CAT_CONFIG[15];
+        }
+
+        let hamsterSpeedMultiplier = 1.0;
+        let catSpeedMultiplier = 1.0;
+        let practiceModeEnabled = false;
+
+        const CAT_CONFIG = {
+            1: { speed: 0.25, delay: 3000 },
+            2: { speed: 0.3, delay: 2800 },
+            3: { speed: 0.35, delay: 2500 },
+            4: { speed: 0.4, delay: 2200 },
+            5: { speed: 0.45, delay: 2000 },
+            6: { speed: 0.48, delay: 1800 },
+            7: { speed: 0.52, delay: 1700 },
+            8: { speed: 0.55, delay: 1500 },
+            9: { speed: 0.58, delay: 1400 },
+            10: { speed: 0.65, delay: 1100 },
+        };
+
+        const mazeSize = 15;
+        const cellSize = 8;
+
+        const mazeLayout = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ];
+
+        // 🛡️ INFINITE LOOP PROTECTION
+        function generateRandomCheeseCoords(count) {
+            const coords = [];
+            const used = new Set();
+            let attempts = 0;
+            const maxAttempts = 100;
+            while (coords.length < count && attempts < maxAttempts) {
+                const gx = Math.floor(Math.random() * 13) + 1;
+                const gz = Math.floor(Math.random() * 13) + 1;
+                const key = `${gx},${gz}`;
+                if (mazeLayout[gz][gx] === 0 && !used.has(key)) {
+                    used.add(key);
+                    coords.push({ gx, gz });
+                }
+                attempts++;
+            }
+            if (attempts >= maxAttempts) {
+                console.warn("Could not find open tile for cheese placement!");
+            }
+            return coords;
+        }
+
+        const defaultCheeseCoords = [
+            { gx: 1, gz: 1 }, { gx: 13, gz: 1 }, { gx: 1, gz: 13 }, { gx: 13, gz: 13 }, { gx: 7, gz: 5 },
+        ];
+
+        let levelCheeseCoords = {};
+        for (let i = 1; i <= 10; i++) {
+            levelCheeseCoords[i] = generateRandomCheeseCoords(5);
+        }
+
+        const wrapper = document.getElementById("game-wrapper");
+
+        // Prevent pull-to-refresh and other browser gestures (but allow modal scrolling)
+        wrapper.addEventListener('touchmove', function(e) {
+            if (!e.target.closest('#licensingModal')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        function formatScore(scoreNum) {
+            if (scoreNum >= 1000000) return (scoreNum / 1000000).toFixed(1) + "M";
+            if (scoreNum >= 1000) return (scoreNum / 1000).toFixed(1) + "K";
+            return scoreNum.toString();
+        }
+
+        function getScreenPosition(object3D) {
+            const vector = object3D.position.clone();
+            vector.project(camera);
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+            return { x, y };
+        }
+
+        function showFloatingText(text, x, y) {
+            const container = document.getElementById("floatingTextContainer");
+            const floatEl = document.createElement("div");
+            floatEl.className = "floating-text";
+            floatEl.innerText = text;
+            floatEl.style.left = x + "px";
+            floatEl.style.top = y + "px";
+            container.appendChild(floatEl);
+            setTimeout(() => { floatEl.remove(); }, 1000);
+        }
+
+        function addScore(points, cheeseMesh) {
+            totalScore += points;
+            if (totalScore > highScore) {
+                highScore = totalScore;
+                localStorage.setItem("pawGlowHighScore", highScore);
+            }
+            document.getElementById("scoreDisplay").innerText = formatScore(totalScore);
+            document.getElementById("highScoreDisplay").innerText = formatScore(highScore);
+            if (cheeseMesh && camera) {
+                const screenPos = getScreenPosition(cheeseMesh);
+                showFloatingText("+" + points, screenPos.x, screenPos.y);
+            }
+        }
+
+        function displayActiveJoysticks() {
+            if (window.innerWidth > window.innerHeight) {
+                document.getElementById("joystick").style.display = "block";
+                document.getElementById("leftJoystick").style.display = "block";
+            } else {
+                document.getElementById("joystick").style.display = "block";
+                document.getElementById("leftJoystick").style.display = "none";
+            }
+        }
+
+        // Sound toggle
+        document.getElementById("toggleSoundBtn").addEventListener("click", function() {
+            soundEnabled = !soundEnabled;
+            this.textContent = soundEnabled ? '🔊' : '🔇';
+            sfx.setEnabled(soundEnabled);
+            const music = document.getElementById("bg-music");
+            if (music) {
+                if (soundEnabled) music.play().catch(() => {});
+                else music.pause();
+            }
+            localStorage.setItem("pawGlowSoundEnabled", soundEnabled);
+        });
+
+        document.getElementById("startPlayBtn").addEventListener("click", () => {
+            sfx.init();
+            sfx.collect();
+            document.getElementById("startMenu").style.display = "none";
+            document.getElementById("ui").style.display = "block";
+            document.getElementById("scoreUI").style.display = "flex";
+            document.getElementById("controls").style.display = "block";
+            displayActiveJoysticks();
+            document.getElementById("saveLoadContainer").style.display = "flex";
+            document.getElementById("zoomControls").style.display = "flex";
+            gameStarted = true;
+            updateZoomLabel();
+            totalScore = 0;
+            document.getElementById("scoreDisplay").innerText = formatScore(totalScore);
+            startLevel(1);
+        });
+
+        const licensingModal = document.getElementById("licensingModal");
+        document.getElementById("openLicensingBtn").addEventListener("click", () => {
+            licensingModal.style.display = "flex";
+        });
+        document.getElementById("closeLicensingBtn").addEventListener("click", () => {
+            licensingModal.style.display = "none";
+        });
+
+        function showLevelSelect() {
+            const maxUnlocked = Math.max(1, parseInt(localStorage.getItem("pawGlowUnlockedLevel") || 1));
+            const grid = document.getElementById("levelGrid");
+            grid.innerHTML = "";
+            document.getElementById("startMenu").style.display = "none";
+            document.getElementById("zoomControls").style.display = "none";
+            for (let i = 1; i <= 10; i++) {
+                const btn = document.createElement("button");
+                btn.className = `level-btn ${i <= maxUnlocked ? "unlocked" : "locked"}`;
+                if (i === currentLevel && gameStarted) btn.classList.add("current");
+                btn.textContent = i;
+                if (i <= maxUnlocked) {
+                    btn.onclick = () => {
+                        document.getElementById("levelSelect").style.display = "none";
+                        document.getElementById("startMenu").style.display = "none";
+                        document.getElementById("ui").style.display = "block";
+                        document.getElementById("scoreUI").style.display = "flex";
+                        document.getElementById("controls").style.display = "block";
+                        displayActiveJoysticks();
+                        document.getElementById("saveLoadContainer").style.display = "flex";
+                        document.getElementById("zoomControls").style.display = "flex";
+                        gameStarted = true;
+                        updateZoomLabel();
+                        startLevel(i);
+                    };
+                }
+                grid.appendChild(btn);
+            }
+            document.getElementById("levelSelect").style.display = "flex";
+        }
+
+        document.getElementById("backToMenuBtn").addEventListener("click", () => {
+            document.getElementById("levelSelect").style.display = "none";
+            document.getElementById("startMenu").style.display = "flex";
+            document.getElementById("zoomControls").style.display = "none";
+        });
+
+        function returnToMenu() {
+            document.getElementById("ui").style.display = "none";
+            document.getElementById("scoreUI").style.display = "none";
+            document.getElementById("controls").style.display = "none";
+            document.getElementById("saveLoadContainer").style.display = "none";
+            document.getElementById("zoomControls").style.display = "none";
+            document.getElementById("joystick").style.display = "none";
+            document.getElementById("leftJoystick").style.display = "none";
+            document.getElementById("powerUpUI").style.display = "none";
+            document.getElementById("gameOverlay").style.display = "none";
+            document.getElementById("winOverlay").style.display = "none";
+            document.getElementById("startMenu").style.display = "flex";
+            const music = document.getElementById("bg-music");
+            if (music) {
+                music.pause();
+                music.currentTime = 0;
+            }
+            gameStarted = false;
+            gameOver = false;
+            powerUpActive = false;
+        }
+
+        document.getElementById("returnToMenuBtn").addEventListener("click", returnToMenu);
+
+        function showLevelClearModal() {
+            sfx.victoryKazoo();
+            levelClearPending = true;
+            const modal = document.getElementById("levelClearModal");
+            const text = document.getElementById("levelClearText");
+            const nextLvl = currentLevel + 1;
+            localStorage.setItem("pawGlowUnlockedLevel", Math.max(nextLvl, parseInt(localStorage.getItem("pawGlowUnlockedLevel") || 1)));
+            if (currentLevel >= 10) {
+                text.textContent = "You've beaten the final level! Ultimate hamster hero!";
+                modal.querySelector(".next-level-btn").textContent = "🎉 Victory!";
+            } else {
+                text.textContent = `Amazing job! Get ready for Level ${currentLevel + 1}...`;
+                modal.querySelector(".next-level-btn").textContent = "Continue";
+            }
+            modal.style.display = "flex";
+        }
+
+        function continueToNextLevel() {
+            document.getElementById("levelClearModal").style.display = "none";
+            levelClearPending = false;
+            if (currentLevel >= 10) {
+                triggerWin();
+            } else {
+                startLevel(currentLevel + 1);
+            }
+        }
+
+        // 🔄 PURE STATE RESET (No more location.reload() white flashes!)
+function restartGame() {
+    try {
+        console.log("Restarting game...");
+        
+        // 1. Reset progress and level back to Level 1
+        currentLevel = 1; 
+        totalScore = 0;
+        score = 0;
+        
+        // 2. Reset ALL game state variables
+        isGameOverTriggered = false;
+        alarmActive = false;
+        levelClearPending = false;
+        gameOver = false;
+        powerUpActive = false;
+        isFoxActive = false;
+        
+        // 3. Clear all dynamic Three.js entities from the scene (if scene exists)
+        if (typeof scene !== 'undefined' && scene) {
+            if (cheeses) {
+                cheeses.forEach(c => {
+                    if (c.mesh) scene.remove(c.mesh);
+                });
+                cheeses = [];
+            }
+            
+            if (cats) {
+                cats.forEach(c => scene.remove(c));
+                cats = [];
+            }
+            
+            if (guardCats) {
+                guardCats.forEach(c => scene.remove(c));
+                guardCats = [];
+            }
+            
+            if (balls) {
+                balls.forEach(b => scene.remove(b));
+                balls = [];
+            }
+            
+            if (activeParticles) {
+                activeParticles.forEach(p => {
+                    releaseParticle(p);
+                });
+                activeParticles = [];
+            }
+            
+            if (trailParticles) {
+                trailParticles.forEach(t => {
+                    scene.remove(t.mesh);
+                    if (t.geometry) t.geometry.dispose();
+                    if (t.material) t.material.dispose();
+                });
+                trailParticles = [];
+            }
+        }
+        
+        // 4. Hide all modals and overlays
+        const gameOverlay = document.getElementById("gameOverlay");
+        const winOverlay = document.getElementById("winOverlay");
+        const levelClearModal = document.getElementById("levelClearModal");
+        const powerUpUI = document.getElementById("powerUpUI");
+        
+        if (gameOverlay) gameOverlay.style.display = "none";
+        if (winOverlay) winOverlay.style.display = "none";
+        if (levelClearModal) levelClearModal.style.display = "none";
+        if (powerUpUI) powerUpUI.style.display = "none";
+        
+        hideAlarmWarning();
+        
+        // 5. Reset UI text
+        const scoreEl = document.getElementById("score");
+        const targetScoreEl = document.getElementById("targetScore");
+        const scoreDisplayEl = document.getElementById("scoreDisplay");
+        const highScoreDisplayEl = document.getElementById("highScoreDisplay");
+        
+        if (scoreEl) scoreEl.textContent = "0";
+        if (targetScoreEl) targetScoreEl.textContent = "5";
+        if (scoreDisplayEl) scoreDisplayEl.innerText = "0";
+        if (highScoreDisplayEl) highScoreDisplayEl.innerText = formatScore(highScore);
+        
+        // 6. Restart fresh at Level 1!
+        startLevel(currentLevel);
+        console.log("Game restarted successfully!");
+        
+    } catch (error) {
+        console.error("Error in restartGame():", error);
+        // Fallback: reload the page if restart fails
+        location.reload();
+    }
+}
+
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x3a7a3a);
+            scene.fog = new THREE.Fog(0x3a7a3a, 80, 400);
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const initialFov = width > height ? 25 : 55;
+            camera = new THREE.PerspectiveCamera(initialFov, width / height, 0.1, 200);
+            const config = zoomConfigs[zoomLevel];
+            camera.position.set(0, config.height, config.distance);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            wrapper.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(20, 40, 20);
+            dirLight.castShadow = true;
+            dirLight.shadow.camera.left = -70;
+            dirLight.shadow.camera.right = 70;
+            dirLight.shadow.camera.top = 70;
+            dirLight.shadow.camera.bottom = -70;
+            scene.add(dirLight);
+
+            createMaze();
+            createHamster();
+            boundaryFox = createBoundaryFox();
+            setupJoystick();
+            setupZoomControls();
+
+            document.getElementById("restartBtn").addEventListener("click", restartGame);
+            document.getElementById("restartBtnWin").addEventListener("click", restartGame);
+
+            soundEnabled = localStorage.getItem("pawGlowSoundEnabled") !== "false";
+            document.getElementById("toggleSoundBtn").textContent = soundEnabled ? '🔊' : '🔇';
+            sfx.setEnabled(soundEnabled);
+
+            window.addEventListener("resize", () => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                if (width > 0 && height > 0) {
+                    camera.aspect = width / height;
+                    const defaultFOV = 55;
+                    if (width > height) {
+                        camera.fov = defaultFOV * (height / width) * 1.5;
+                    } else {
+                        camera.fov = defaultFOV;
+                    }
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(width, height);
+                    if (gameStarted && !gameOver && !levelClearPending) {
+                        displayActiveJoysticks();
+                    }
+                }
+            });
+
+            window.dispatchEvent(new Event("resize"));
+            animate();
+        }
+
+        function setupZoomControls() {
+            const zoomInBtn = document.getElementById("zoomInBtn");
+            const zoomOutBtn = document.getElementById("zoomOutBtn");
+            zoomInBtn.addEventListener("click", () => {
+                if (zoomLevel < 2 && !isTransitioning) {
+                    zoomLevel++;
+                    applyZoomTransition();
+                }
+            });
+            zoomOutBtn.addEventListener("click", () => {
+                if (zoomLevel > 0 && !isTransitioning) {
+                    zoomLevel--;
+                    applyZoomTransition();
+                }
+            });
+            setupPinchZoom();
+        }
+
+        function applyZoomTransition() {
+            isTransitioning = true;
+            const config = zoomConfigs[zoomLevel];
+            const startY = camera.position.y;
+            const startZ = camera.position.z;
+            const targetY = config.height;
+            const targetZ = hamster ? hamster.position.z + config.distance : config.distance;
+            const duration = 300;
+            const startTime = Date.now();
+
+            function animateZoom() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                camera.position.y = startY + (targetY - startY) * ease;
+                camera.position.z = startZ + (targetZ - startZ) * ease;
+                camera.lookAt(hamster ? hamster.position : new THREE.Vector3(0, 0, 0));
+                if (progress < 1) {
+                    requestAnimationFrame(animateZoom);
+                } else {
+                    isTransitioning = false;
+                }
+            }
+            animateZoom();
+            updateZoomLabel();
+        }
+
+        function updateZoomLabel() {
+            const label = document.getElementById("zoomLabel");
+            if (label) label.textContent = zoomConfigs[zoomLevel].label;
+        }
+
+        function setupPinchZoom() {
+            let initialPinchDistance = null;
+
+            function isInsideJoystick(touch) {
+                const target = touch.target;
+                return target.closest("#joystick") || target.closest("#leftJoystick");
+            }
+            document.addEventListener("touchstart", (e) => {
+                if (e.touches.length === 2) {
+                    if (isInsideJoystick(e.touches[0]) || isInsideJoystick(e.touches[1])) {
+                        initialPinchDistance = null;
+                        return;
+                    }
+                    initialPinchDistance = getPinchDistance(e.touches);
+                }
+            }, { passive: true });
+            document.addEventListener("touchmove", (e) => {
+                if (e.touches.length === 2 && initialPinchDistance && !isTransitioning) {
+                    if (isInsideJoystick(e.touches[0]) || isInsideJoystick(e.touches[1])) return;
+                    e.preventDefault();
+                    const currentDistance = getPinchDistance(e.touches);
+                    const delta = currentDistance - initialPinchDistance;
+                    if (Math.abs(delta) > 30) {
+                        if (delta > 0 && zoomLevel > 0) {
+                            zoomLevel--;
+                            applyZoomTransition();
+                            initialPinchDistance = currentDistance;
+                        } else if (delta < 0 && zoomLevel < 2) {
+                            zoomLevel++;
+                            applyZoomTransition();
+                            initialPinchDistance = currentDistance;
+                        }
+                    }
+                }
+            }, { passive: false });
+            document.addEventListener("touchend", () => { initialPinchDistance = null; });
+        }
+
+        function getPinchDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function startLevel(level) {
+            const music = document.getElementById("bg-music");
+            if (music) {
+                music.volume = 0.4;
+                music.loop = true;
+                if (soundEnabled) music.play().catch((err) => console.log("Audio interaction check:", err));
+            }
+
+            currentLevel = level;
+            score = 0;
+            gameOver = false;
+            powerUpActive = false;
+            document.getElementById("powerUpUI").style.display = "none";
+            hamsterSpeed = BASE_HAMSTER_SPEED * hamsterSpeedMultiplier;
+
+            const config = CAT_CONFIG[currentLevel] || CAT_CONFIG[10];
+            catSpeed = config.speed * catSpeedMultiplier;
+            catChaseDelay = config.delay;
+
+            levelCheeseCoords[currentLevel] = generateRandomCheeseCoords(5);
+            const currentCoords = levelCheeseCoords[currentLevel];
+            totalCheesesInLevel = currentCoords.length;
+
+            document.getElementById("score").textContent = score;
+            document.getElementById("targetScore").textContent = totalCheesesInLevel;
+            document.getElementById("level").textContent = currentLevel;
+            document.getElementById("scoreDisplay").innerText = formatScore(totalScore);
+            document.getElementById("highScoreDisplay").innerText = formatScore(highScore);
+
+            // Cleanup old objects
+            cheeses.forEach((c) => {
+                scene.remove(c.mesh);
+                if (c.mesh.geometry && c.mesh.geometry !== sharedParticleGeo && c.mesh.geometry !== sharedBurstGeo) c.mesh.geometry.dispose();
+            });
+            cheeses = [];
+            cats.forEach((c) => scene.remove(c));
+            cats = [];
+            activeParticles.forEach((p) => { releaseParticle(p); });
+            activeParticles = [];
+            trailParticles.forEach((t) => {
+                scene.remove(t.mesh);
+                t.mesh.geometry.dispose();
+                t.mesh.material.dispose();
+            });
+            trailParticles = [];
+
+            if (hamster) {
+                hamster.position.set(-2, 0, -2);
+                hamster.rotation.y = 0;
+                hamster.scale.set(1.6, 1.6, 1.6);
+            }
+
+            placeCheese();
+            spawnLevelPowerUp(currentLevel);
+
+            if (currentLevel <= 2) {
+                createCatEntity(44, -52);
+            } else if (currentLevel <= 4) {
+                createCatEntity(44, -52); createCatEntity(-52, 44);
+            } else if (currentLevel <= 6) {
+                createCatEntity(44, -52); createCatEntity(-52, 44); createCatEntity(44, 44);
+            } else if (currentLevel <= 8) {
+                createCatEntity(44, -52); createCatEntity(-52, 44); createCatEntity(44, 44); createCatEntity(-52, -52);
+            } else {
+                createCatEntity(44, -52); createCatEntity(-52, 44); createCatEntity(44, 44); createCatEntity(-52, -52); createCatEntity(0, 0);
+            }
+
+            cats.forEach((cat) => {
+                cat.userData.speed = catSpeed;
+                cat.userData.chaseDelay = catChaseDelay;
+                cat.userData.timer = Date.now() + catChaseDelay;
+            });
+
+            guardCats.forEach(c => scene.remove(c));
+            guardCats.length = 0;
+            balls.forEach(b => scene.remove(b));
+            balls.length = 0;
+            alarmActive = false;
+            hideAlarmWarning();
+
+            if (currentLevel >= 5) {
+                const gConfig = getGuardConfig(currentLevel);
+                const sides = ['north', 'south', 'east', 'west'];
+                for (let i = 0; i < gConfig.count; i++) {
+                    const cat = createGuardCat(sides[i % 4]);
+                    cat.userData.speed = gConfig.speed * catSpeedMultiplier;
+                    cat.userData.retreatSpeed = gConfig.retreatSpeed * catSpeedMultiplier;
+                    cat.userData.searchTime = gConfig.searchTime;
+                }
+                const ballSpeed = 0.12 + (currentLevel - 5) * 0.02;
+                createBallEntity(25, -25, 25, 25, ballSpeed);
+                if (currentLevel >= 11) createBallEntity(-25, 25, -25, -25, ballSpeed * 1.15);
+                if (currentLevel >= 15) createBallEntity(25, 25, -25, -25, ballSpeed * 1.1);
+            }
+
+            if (gameStarted) catStartTime = Date.now();
+        }
+
+        function createBoundaryFox() {
+            const foxGroup = new THREE.Group();
+            const bodyGeo = new THREE.BoxGeometry(2.5, 1.8, 3.5);
+            const bodyMat = new THREE.MeshLambertMaterial({ color: 0xd35400 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 1.2; body.castShadow = true;
+            foxGroup.add(body);
+            const headGeo = new THREE.BoxGeometry(1.8, 1.5, 2);
+            const head = new THREE.Mesh(headGeo, bodyMat);
+            head.position.set(0, 1.8, 2); head.castShadow = true;
+            foxGroup.add(head);
+            const earGeo = new THREE.ConeGeometry(0.3, 0.8, 4);
+            const earMat = new THREE.MeshLambertMaterial({ color: 0xa04000 });
+            const leftEar = new THREE.Mesh(earGeo, earMat); leftEar.position.set(-0.5, 2.6, 2);
+            const rightEar = new THREE.Mesh(earGeo, earMat); rightEar.position.set(0.5, 2.6, 2);
+            foxGroup.add(leftEar, rightEar);
+            const eyeGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat); leftEye.position.set(-0.5, 1.9, 2.8);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat); rightEye.position.set(0.5, 1.9, 2.8);
+            foxGroup.add(leftEye, rightEye);
+            const tailGeo = new THREE.ConeGeometry(0.4, 2, 8);
+            const tailMat = new THREE.MeshLambertMaterial({ color: 0xe67e22 });
+            const tail = new THREE.Mesh(tailGeo, tailMat);
+            tail.position.set(0, 1.5, -2); tail.rotation.x = -0.5;
+            foxGroup.add(tail);
+            foxGroup.position.set(100, 0, 100);
+            foxGroup.visible = false;
+            scene.add(foxGroup);
+            return foxGroup;
+        }
+
+        function checkCityBoundaries() {
+            if (gameOver || !gameStarted || levelClearPending || isGameOverTriggered) return;
+            
+            // Squared distance optimization
+            const distSqFromCenter = hamster.position.x * hamster.position.x + hamster.position.z * hamster.position.z;
+            const safeRadiusSq = CITY_SAFE_RADIUS * CITY_SAFE_RADIUS;
+            
+            if (distSqFromCenter > safeRadiusSq) {
+                if (!isFoxActive) {
+                    isFoxActive = true;
+                    boundaryFox.visible = true;
+                    const angle = Math.atan2(hamster.position.z, hamster.position.x);
+                    boundaryFox.position.set(
+                        hamster.position.x + Math.cos(angle) * 15,
+                        0,
+                        hamster.position.z + Math.sin(angle) * 15
+                    );
+                }
+                boundaryFox.lookAt(hamster.position);
+                boundaryFox.translateZ(1.0);
+                
+                const foxDistSq = Math.pow(hamster.position.x - boundaryFox.position.x, 2) + Math.pow(hamster.position.z - boundaryFox.position.z, 2);
+                if (foxDistSq < 9.0) { // 3.0 * 3.0
+                    triggerFoxGameOver();
+                }
+            } else {
+                if (isFoxActive) {
+                    isFoxActive = false;
+                    boundaryFox.visible = false;
+                    boundaryFox.position.set(100, 0, 100);
+                }
+            }
+        }
+
+        function triggerFoxGameOver() {
+            sfx.gameOver();
+            isGameOverTriggered = true;
+            gameOver = true;
+            const overlay = document.getElementById("gameOverlay");
+            overlay.querySelector("h2").textContent = "🦊 Caught by the Patrol Fox!";
+            overlay.querySelector("p").textContent = "You wandered too far outside the city and were caught by the giant patrol fox! Stay within the safe zone!";
+            overlay.style.display = "flex";
+        }
+
+        function createMaze() {
+            scene.background = new THREE.Color(0x1e272e);
+            scene.fog = new THREE.Fog(0x1e272e, 80, 400);
+            const groundGeometry = new THREE.PlaneGeometry(1000, 1000);
+            const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x4a4a4a });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            const houseColors = [0xe0c090, 0xd2b48c, 0xf5deb3, 0xcd853f];
+            const roofColors = [0xc0392b, 0x8e44ad, 0x2980b9, 0x27ae60];
+
+            for (let z = 0; z < mazeSize; z++) {
+                for (let x = 0; x < mazeSize; x++) {
+                    const worldX = (x - mazeSize / 2) * cellSize;
+                    const worldZ = (z - mazeSize / 2) * cellSize;
+
+                    if (mazeLayout[z][x] === 1) {
+                        if (Math.random() < 0.3) {
+                            const treeGroup = new THREE.Group();
+                            const trunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 2, 8);
+                            const trunkMat = new THREE.MeshLambertMaterial({ color: 0x5c4033 });
+                            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                            trunk.position.y = 1; trunk.castShadow = true;
+                            treeGroup.add(trunk);
+                            const leavesGeo = new THREE.ConeGeometry(1.5, 3, 8);
+                            const leavesMat = new THREE.MeshLambertMaterial({ color: 0x228b22 });
+                            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+                            leaves.position.y = 3; leaves.castShadow = true;
+                            treeGroup.add(leaves);
+                            const leavesGeo2 = new THREE.ConeGeometry(1.2, 2.5, 8);
+                            const leaves2 = new THREE.Mesh(leavesGeo2, leavesMat);
+                            leaves2.position.y = 4; leaves2.castShadow = true;
+                            treeGroup.add(leaves2);
+                            treeGroup.position.set(worldX, 0, worldZ);
+                            scene.add(treeGroup);
+                            maze.push({ x: worldX, z: worldZ, width: cellSize * 0.4, depth: cellSize * 0.4 });
+                        } else {
+                            const houseGroup = new THREE.Group();
+                            const baseHeight = 3 + Math.random() * 2;
+                            const baseGeo = new THREE.BoxGeometry(cellSize * 0.8, baseHeight, cellSize * 0.8);
+                            const baseColor = houseColors[Math.floor(Math.random() * houseColors.length)];
+                            const baseMat = new THREE.MeshLambertMaterial({ color: baseColor });
+                            const base = new THREE.Mesh(baseGeo, baseMat);
+                            base.position.y = baseHeight / 2; base.castShadow = true; base.receiveShadow = true;
+                            houseGroup.add(base);
+                            const roofGeo = new THREE.ConeGeometry(cellSize * 0.6, 2.5, 4);
+                            const roofColor = roofColors[Math.floor(Math.random() * roofColors.length)];
+                            const roofMat = new THREE.MeshLambertMaterial({ color: roofColor });
+                            const roof = new THREE.Mesh(roofGeo, roofMat);
+                            roof.position.y = baseHeight + 1.25; roof.rotation.y = Math.PI / 4; roof.castShadow = true;
+                            houseGroup.add(roof);
+                            const doorGeo = new THREE.BoxGeometry(0.8, 1.5, 0.1);
+                            const doorMat = new THREE.MeshLambertMaterial({ color: 0x4a2f1d });
+                            const door = new THREE.Mesh(doorGeo, doorMat);
+                            door.position.set(0, 0.75, cellSize * 0.41);
+                            houseGroup.add(door);
+                            const winGeo = new THREE.BoxGeometry(0.8, 0.8, 0.1);
+                            const winMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+                            const win1 = new THREE.Mesh(winGeo, winMat); win1.position.set(-1.2, baseHeight / 2 + 0.5, cellSize * 0.41);
+                            houseGroup.add(win1);
+                            const win2 = new THREE.Mesh(winGeo, winMat); win2.position.set(1.2, baseHeight / 2 + 0.5, cellSize * 0.41);
+                            houseGroup.add(win2);
+                            houseGroup.position.set(worldX, 0, worldZ);
+                            houseGroup.rotation.y = Math.floor(Math.random() * 4) * (Math.PI / 2);
+                            scene.add(houseGroup);
+                            maze.push({ x: worldX, z: worldZ, width: cellSize * 0.8, depth: cellSize * 0.8 });
+                        }
+                    }
+                }
+            }
+        }
+
+        function createHamster() {
+            const bodyGeometry = new THREE.SphereGeometry(0.8, 32, 32);
+            const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xd2691e });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.y = 0.8; body.castShadow = true;
+            const earGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+            const earMaterial = new THREE.MeshLambertMaterial({ color: 0xffb6c1 });
+            const leftEar = new THREE.Mesh(earGeometry, earMaterial);
+            leftEar.position.set(-0.5, 1.4, 0); leftEar.scale.set(1, 1.5, 0.3);
+            const rightEar = new THREE.Mesh(earGeometry, earMaterial);
+            rightEar.position.set(0.5, 1.4, 0); rightEar.scale.set(1, 1.5, 0.3);
+            const eyeGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial); leftEye.position.set(-0.3, 1.0, 0.7);
+            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial); rightEye.position.set(0.3, 1.0, 0.7);
+            const noseGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+            const noseMaterial = new THREE.MeshLambertMaterial({ color: 0xff69b4 });
+            const nose = new THREE.Mesh(noseGeometry, noseMaterial); nose.position.set(0, 0.85, 0.75);
+            hamster = new THREE.Group();
+            hamster.add(body, leftEar, rightEar, leftEye, rightEye, nose);
+            hamster.position.set(-2, 0, -2);
+            hamster.scale.set(1.6, 1.6, 1.6);
+            scene.add(hamster);
+        }
+
+        function createCatEntity(startX, startZ) {
+            const bodyGeometry = new THREE.BoxGeometry(1.2, 1.2, 1.8);
+            const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x800080, transparent: true, opacity: 1.0 });
+            const singleCat = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            const eyeGeo = new THREE.SphereGeometry(0.2, 8, 8);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 1.0 });
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat); leftEye.name = "leftEye"; leftEye.position.set(-0.4, 0.3, 0.9);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat); rightEye.name = "rightEye"; rightEye.position.set(0.4, 0.3, 0.9);
+            const earGeo = new THREE.ConeGeometry(0.25, 0.5, 8);
+            const earMat = new THREE.MeshLambertMaterial({ color: 0x4b0082, transparent: true, opacity: 1.0 });
+            const leftEar = new THREE.Mesh(earGeo, earMat); leftEar.position.set(-0.45, 0.75, -0.1);
+            const rightEar = new THREE.Mesh(earGeo, earMat); rightEar.position.set(0.45, 0.75, -0.1);
+            const tailGeo = new THREE.CylinderGeometry(0.08, 0.12, 1.2, 8);
+            const tailMat = new THREE.MeshLambertMaterial({ color: 0x4b0082, transparent: true, opacity: 1.0 });
+            const tail = new THREE.Mesh(tailGeo, tailMat); tail.position.set(0, 0.2, -1.2); tail.rotation.x = -0.6;
+            singleCat.add(leftEye, rightEye, leftEar, rightEar, tail);
+            singleCat.position.set(startX, 0.6, startZ);
+            singleCat.scale.set(1.6, 1.6, 1.6);
+            singleCat.castShadow = true;
+            singleCat.userData = {
+                isInvisible: false,
+                timer: Date.now() + Math.random() * 5000 + 3000,
+                speed: catSpeed,
+                chaseDelay: catChaseDelay,
+            };
+            scene.add(singleCat);
+            cats.push(singleCat);
+        }
+
+        function createGuardCat(spawnSide) {
+            const group = new THREE.Group();
+            const bodyGeo = new THREE.BoxGeometry(1.4, 1.4, 2.0);
+            const bodyMat = new THREE.MeshLambertMaterial({ color: 0x2c003e, emissive: 0x0a0010 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat); body.position.y = 1.0; body.castShadow = true;
+            group.add(body);
+            const eyeGeo = new THREE.SphereGeometry(0.22, 8, 8);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat); leftEye.position.set(-0.45, 1.1, 1.0);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat); rightEye.position.set(0.45, 1.1, 1.0);
+            group.add(leftEye, rightEye);
+            const helmetGeo = new THREE.ConeGeometry(0.4, 0.6, 4);
+            const helmetMat = new THREE.MeshLambertMaterial({ color: 0x555555 });
+            const helmet = new THREE.Mesh(helmetGeo, helmetMat); helmet.position.y = 1.8;
+            group.add(helmet);
+            const collarGeo = new THREE.TorusGeometry(0.7, 0.1, 8, 8);
+            const collarMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+            const collar = new THREE.Mesh(collarGeo, collarMat);
+            collar.position.y = 1.4; collar.rotation.x = Math.PI / 2;
+            group.add(collar);
+
+            const cityEdge = 62;
+            let spawnX, spawnZ;
+            switch (spawnSide) {
+                case 'north': spawnX = 0; spawnZ = -cityEdge; break;
+                case 'south': spawnX = 0; spawnZ = cityEdge; break;
+                case 'east': spawnX = cityEdge; spawnZ = 0; break;
+                case 'west': spawnX = -cityEdge; spawnZ = 0; break;
+                default: spawnX = -cityEdge; spawnZ = -cityEdge;
+            }
+            group.position.set(spawnX, 0, spawnZ);
+            group.scale.set(1.8, 1.8, 1.8);
+            group.userData = {
+                state: 'guarding', homeX: spawnX, homeZ: spawnZ,
+                speed: 0.35, retreatSpeed: 0.25, searchTime: 5000,
+                searchTimer: 0, lastKnownPlayerX: 0, lastKnownPlayerZ: 0,
+                searchRadius: 8, searchAngle: Math.random() * Math.PI * 2,
+            };
+            scene.add(group);
+            guardCats.push(group);
+            return group;
+        }
+
+        function createBallEntity(startX, startZ, patrolEndX, patrolEndZ, speed) {
+            const ballGeo = new THREE.SphereGeometry(0.6, 16, 16);
+            const ballMat = new THREE.MeshPhongMaterial({ color: 0xff4444, emissive: 0x330000, emissiveIntensity: 0.2, specular: 0xffffff, shininess: 60 });
+            const ball = new THREE.Mesh(ballGeo, ballMat);
+            ball.position.set(startX, 0.5, startZ); ball.castShadow = true; ball.scale.set(1.4, 1.4, 1.4);
+            const spikeGeo = new THREE.TorusGeometry(0.65, 0.08, 8, 12);
+            const spikeMat = new THREE.MeshLambertMaterial({ color: 0xcc0000 });
+            const spikeRing = new THREE.Mesh(spikeGeo, spikeMat);
+            spikeRing.rotation.x = Math.PI / 2;
+            ball.add(spikeRing);
+            ball.userData = {
+                startX, startZ, patrolEndX, patrolEndZ,
+                targetX: patrolEndX, targetZ: patrolEndZ,
+                speed: speed, state: 'patrol', alertTimer: 0, triggered: false, spikeRing: spikeRing,
+            };
+            scene.add(ball);
+            balls.push(ball);
+            return ball;
+        }
+
+        function spawnLevelPowerUp(lvl) {
+            if (lvl < 6) return;
+            const powerUpSpawns = {
+                6: { gx: 7, gz: 9 }, 7: { gx: 7, gz: 1 }, 8: { gx: 7, gz: 13 },
+                9: { gx: 1, gz: 7 }, 10: { gx: 13, gz: 7 },
+            };
+            const pSpawn = powerUpSpawns[lvl];
+            if (pSpawn) {
+                const powerUpGeo = new THREE.CylinderGeometry(0.1, 0.6, 1.2, 4);
+                const powerUpMat = new THREE.MeshLambertMaterial({ color: 0xff3300, emissive: 0x990000, emissiveIntensity: 0.4 });
+                const powerUpMesh = new THREE.Mesh(powerUpGeo, powerUpMat);
+                const worldX = (pSpawn.gx - mazeSize / 2) * cellSize;
+                const worldZ = (pSpawn.gz - mazeSize / 2) * cellSize;
+                powerUpMesh.position.set(worldX, 0.6, worldZ);
+                powerUpMesh.rotation.y = Math.PI / 4;
+                powerUpMesh.castShadow = true;
+                scene.add(powerUpMesh);
+                cheeses.push({ mesh: powerUpMesh, collected: false, isPowerUp: true });
+            }
+        }
+
+        function createPowerUpBurst(position) {
+            const burstMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.8 });
+            const burst = new THREE.Mesh(sharedBurstGeo, burstMat);
+            burst.position.copy(position); burst.position.y = 1;
+            scene.add(burst);
+            let opacity = 0.8;
+            const fadeInterval = setInterval(() => {
+                opacity -= 0.1;
+                burst.material.opacity = opacity;
+                burst.scale.multiplyScalar(1.1);
+                if (opacity <= 0) {
+                    scene.remove(burst);
+                    burstMat.dispose();
+                    clearInterval(fadeInterval);
+                }
+            }, 50);
+        }
+
+        function updateGuardCats() {
+            if (guardCats.length === 0 || gameOver || !gameStarted || levelClearPending) return;
+            const playerX = hamster.position.x;
+            const playerZ = hamster.position.z;
+
+            guardCats.forEach(cat => {
+                const data = cat.userData;
+                const dx = playerX - cat.position.x;
+                const dz = playerZ - cat.position.z;
+                const distToPlayerSq = dx * dx + dz * dz; // Squared distance optimization
+
+                const lookTarget = new THREE.Vector3();
+
+                switch (data.state) {
+                    case 'guarding':
+                        cat.rotation.y += 0.008;
+                        cat.position.y = Math.sin(Date.now() * 0.002) * 0.3;
+                        if (alarmActive) {
+                            data.state = 'investigating';
+                            data.lastKnownPlayerX = playerX;
+                            data.lastKnownPlayerZ = playerZ;
+                            data.searchTimer = data.searchTime;
+                        }
+                        break;
+                    case 'investigating':
+                        const idX = data.lastKnownPlayerX - cat.position.x;
+                        const idZ = data.lastKnownPlayerZ - cat.position.z;
+                        const idDist = Math.sqrt(idX * idX + idZ * idZ); // Need actual distance for movement vector
+                        if (idDist > 2.0) {
+                            const moveX = (idX / idDist) * data.speed;
+                            const moveZ = (idZ / idDist) * data.speed;
+                            if (!checkCollision(cat.position.x + moveX, cat.position.z)) cat.position.x += moveX;
+                            if (!checkCollision(cat.position.x, cat.position.z + moveZ)) cat.position.z += moveZ;
+                            cat.position.y = Math.abs(Math.sin(Date.now() * 0.015)) * 0.6;
+                            lookTarget.set(data.lastKnownPlayerX, 0, data.lastKnownPlayerZ);
+                            cat.lookAt(lookTarget);
+                        } else {
+                            data.state = 'searching';
+                            data.searchTimer = data.searchTime;
+                            data.searchAngle = Math.random() * Math.PI * 2;
+                        }
+                        break;
+                    case 'searching':
+                        data.searchTimer -= 16;
+                        data.searchAngle += 0.03;
+                        const searchProgress = 1 - (data.searchTimer / data.searchTime);
+                        const searchX = data.lastKnownPlayerX + Math.cos(data.searchAngle) * data.searchRadius * searchProgress;
+                        const searchZ = data.lastKnownPlayerZ + Math.sin(data.searchAngle) * data.searchRadius * searchProgress;
+                        const sdx = searchX - cat.position.x;
+                        const sdz = searchZ - cat.position.z;
+                        const sdist = Math.sqrt(sdx * sdx + sdz * sdz);
+                        if (sdist > 0.5) {
+                            const moveX = (sdx / sdist) * data.speed * 0.6;
+                            const moveZ = (sdz / sdist) * data.speed * 0.6;
+                            if (!checkCollision(cat.position.x + moveX, cat.position.z)) cat.position.x += moveX;
+                            if (!checkCollision(cat.position.x, cat.position.z + moveZ)) cat.position.z += moveZ;
+                            cat.position.y = Math.sin(Date.now() * 0.008) * 0.4;
+                        }
+                        lookTarget.set(searchX, 0, searchZ);
+                        cat.lookAt(lookTarget);
+                        if (distToPlayerSq < 144) { // 12 * 12
+                            data.lastKnownPlayerX = playerX;
+                            data.lastKnownPlayerZ = playerZ;
+                            data.state = 'investigating';
+                        }
+                        if (data.searchTimer <= 0) data.state = 'retreating';
+                        break;
+                    case 'retreating':
+                        const rdx = data.homeX - cat.position.x;
+                        const rdz = data.homeZ - cat.position.z;
+                        const rdist = Math.sqrt(rdx * rdx + rdz * rdz);
+                        if (rdist > 1.0) {
+                            const moveX = (rdx / rdist) * data.retreatSpeed;
+                            const moveZ = (rdz / rdist) * data.retreatSpeed;
+                            cat.position.x += moveX;
+                            cat.position.z += moveZ;
+                            cat.position.y = Math.sin(Date.now() * 0.005) * 0.2;
+                            lookTarget.set(data.homeX, 0, data.homeZ);
+                            cat.lookAt(lookTarget);
+                        } else {
+                            data.state = 'guarding';
+                            cat.position.y = 0;
+                        }
+                        break;
+                }
+
+                if (distToPlayerSq < 6.25 && data.state !== 'guarding' && data.state !== 'retreating') { // 2.5 * 2.5
+                    triggerGameOver();
+                }
+            });
+        }
+
+        function updateBalls() {
+            if (balls.length === 0 || gameOver || !gameStarted || levelClearPending) return;
+
+            balls.forEach(ball => {
+                const data = ball.userData;
+                const dx = data.targetX - ball.position.x;
+                const dz = data.targetZ - ball.position.z;
+                const dist = Math.sqrt(dx * dx + dz * dz); // Needed for movement vector
+
+                if (dist > 0.5) {
+                    ball.position.x += (dx / dist) * data.speed;
+                    ball.position.z += (dz / dist) * data.speed;
+                    ball.rotation.x += 0.08;
+                    ball.rotation.z += 0.08;
+                } else if (data.state === 'patrol') {
+                    const tempX = data.targetX, tempZ = data.targetZ;
+                    data.targetX = data.startX; data.targetZ = data.startZ;
+                    data.startX = tempX; data.startZ = tempZ;
+                }
+
+                const hdx = hamster.position.x - ball.position.x;
+                const hdz = hamster.position.z - ball.position.z;
+                const hdistSq = hdx * hdx + hdz * hdz; // Squared distance optimization
+
+                if (hdistSq < 6.25 && data.state === 'patrol' && !data.triggered) { // 2.5 * 2.5
+                    data.state = 'alert';
+                    data.alertTimer = 5000;
+                    data.triggered = true;
+                    alarmActive = true;
+                    ball.material.emissive.set(0xff0000);
+                    ball.material.emissiveIntensity = 0.9;
+                    sfx.detected();
+                    createAlarmRing(ball.position);
+                    showAlarmWarning();
+                }
+
+                if (data.state === 'alert') {
+                    data.alertTimer -= 16;
+                    const pulse = Math.sin(Date.now() * 0.02) * 0.3 + 0.6;
+                    ball.material.emissiveIntensity = pulse;
+                    if (data.spikeRing) data.spikeRing.rotation.z += 0.1;
+                    if (data.alertTimer <= 0) {
+                        data.state = 'patrol';
+                        data.triggered = false;
+                        alarmActive = false;
+                        ball.material.emissiveIntensity = 0.2;
+                        ball.material.emissive.set(0x330000);
+                        hideAlarmWarning();
+                    }
+                }
+            });
+        }
+
+        function createAlarmRing(position) {
+            const ringGeo = new THREE.RingGeometry(1, 3, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.copy(position); ring.position.y = 0.15; ring.rotation.x = -Math.PI / 2;
+            scene.add(ring);
+            let scale = 1;
+            const expand = setInterval(() => {
+                scale += 0.25;
+                ring.scale.set(scale, scale, scale);
+                ring.material.opacity -= 0.06;
+                if (ring.material.opacity <= 0) {
+                    scene.remove(ring);
+                    ringGeo.dispose();
+                    ringMat.dispose();
+                    clearInterval(expand);
+                }
+            }, 50);
+        }
+
+        function showAlarmWarning() {
+            const existing = document.getElementById('alarmWarning');
+            if (existing) existing.remove();
+            const warning = document.createElement('div');
+            warning.id = 'alarmWarning';
+            warning.style.cssText = `
+                position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+                color: #ff0000; font-size: 22px; font-weight: bold; text-align: center;
+                text-shadow: 0 0 20px rgba(255,0,0,0.9), 0 0 40px rgba(255,0,0,0.5);
+                pointer-events: none; z-index: 200; animation: alarmPulse 0.4s infinite;
+                background: rgba(0,0,0,0.6); padding: 10px 24px; border-radius: 12px;
+                border: 2px solid #ff0000; letter-spacing: 1px;
+            `;
+            warning.textContent = '🚨 GUARD CATS INCOMING! 🚨';
+            document.getElementById('game-wrapper').appendChild(warning);
+            if (!document.getElementById('alarmKeyframes')) {
+                const style = document.createElement('style');
+                style.id = 'alarmKeyframes';
+                style.textContent = `@keyframes alarmPulse { 0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.08); } }`;
+                document.head.appendChild(style);
+            }
+        }
+
+        function hideAlarmWarning() {
+            const warning = document.getElementById('alarmWarning');
+            if (warning) warning.remove();
+        }
+
+        function updateCats() {
+            if (cats.length === 0 || gameOver || !gameStarted || levelClearPending) return;
+            if (Date.now() - catStartTime < catChaseDelay) {
+                cats.forEach((singleCat) => { singleCat.rotation.y += 0.02; });
+                return;
+            }
+            cats.forEach((singleCat) => {
+                const now = Date.now();
+                const activeSpeed = singleCat.userData.speed || catSpeed;
+                if (now > singleCat.userData.timer) {
+                    singleCat.userData.isInvisible = !singleCat.userData.isInvisible;
+                    if (singleCat.userData.isInvisible) {
+                        singleCat.userData.timer = now + 3000;
+                        singleCat.material.opacity = 0.15;
+                        singleCat.castShadow = false;
+                        singleCat.children.forEach((child) => { if (child.material) child.material.opacity = 0.0; });
+                    } else {
+                        sfx.detected();
+                        singleCat.userData.timer = now + (Math.random() * 4000 + 4000);
+                        singleCat.material.opacity = 1.0;
+                        singleCat.castShadow = true;
+                        singleCat.children.forEach((child) => { if (child.material) child.material.opacity = 1.0; });
+                    }
+                }
+                const dx = hamster.position.x - singleCat.position.x;
+                const dz = hamster.position.z - singleCat.position.z;
+                const dist = Math.sqrt(dx * dx + dz * dz); // Needed for movement
+                if (dist > 1.5) {
+                    const moveX = (dx / dist) * activeSpeed;
+                    const moveZ = (dz / dist) * activeSpeed;
+                    if (!checkCollision(singleCat.position.x + moveX, singleCat.position.z)) singleCat.position.x += moveX;
+                    if (!checkCollision(singleCat.position.x, singleCat.position.z + moveZ)) singleCat.position.z += moveZ;
+                    singleCat.rotation.y = Math.atan2(dx, dz);
+                }
+                if (!singleCat.userData.isInvisible) {
+                    singleCat.children.forEach((child) => {
+                        if (child.name === "leftEye" || child.name === "rightEye") {
+                            const pulse = 1 + Math.sin(Date.now() * 0.01) * 0.2;
+                            child.scale.set(pulse, pulse, pulse);
+                        }
+                    });
+                }
+            });
+        }
+
+        function checkCatCollision() {
+            if (gameOver || !gameStarted || levelClearPending) return;
+            for (let i = 0; i < cats.length; i++) {
+                const singleCat = cats[i];
+                const dx = hamster.position.x - singleCat.position.x;
+                const dz = hamster.position.z - singleCat.position.z;
+                if (dx * dx + dz * dz < 6.25) { // 2.5 * 2.5 (Squared distance optimization)
+                    triggerGameOver();
+                    break;
+                }
+            }
+        }
+
+        function triggerGameOver() {
+            sfx.gameOver();
+            gameOver = true;
+            document.getElementById("gameOverlay").style.display = "flex";
+        }
+
+        function triggerWin() {
+            sfx.victoryKazoo();
+            gameOver = true;
+            document.getElementById("winOverlay").style.display = "flex";
+        }
+
+        function placeCheese() {
+            const currentCoords = levelCheeseCoords[currentLevel] || defaultCheeseCoords;
+            currentCoords.forEach((pos) => {
+                const coinGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.15, 16);
+                const coinMaterial = new THREE.MeshPhongMaterial({ color: 0xffd700, specular: 0xffffff, shininess: 100 });
+                const coin = new THREE.Mesh(coinGeometry, coinMaterial);
+                const worldX = (pos.gx - mazeSize / 2) * cellSize;
+                const worldZ = (pos.gz - mazeSize / 2) * cellSize;
+                coin.position.set(worldX, 0.5, worldZ);
+                coin.rotation.x = Math.PI / 2;
+                coin.castShadow = true;
+                scene.add(coin);
+                cheeses.push({ mesh: coin, collected: false, isPowerUp: false });
+            });
+        }
+
+        function setupJoystick() {
+            const joystick = document.getElementById("joystick");
+            const knob = document.getElementById("joystickKnob");
+            let rightStartX, rightStartY, rightDeltaX = 0, rightDeltaY = 0, rightTouchId = null;
+            const maxDistance = 40;
+
+            const leftJoystick = document.getElementById("leftJoystick");
+            const leftKnob = document.getElementById("leftJoystickKnob");
+            let leftStartX, leftStartY, leftDeltaX = 0, leftDeltaY = 0, leftTouchId = null;
+
+            function updateMovement() {
+                const combinedX = (rightDeltaX + leftDeltaX) / maxDistance;
+                const combinedY = (rightDeltaY + leftDeltaY) / maxDistance;
+                const magnitude = Math.sqrt(combinedX * combinedX + combinedY * combinedY);
+                if (magnitude > 1) {
+                    moveRight = combinedX / magnitude;
+                    moveForward = combinedY / magnitude;
+                } else {
+                    moveRight = combinedX;
+                    moveForward = combinedY;
+                }
+            }
+
+            joystick.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                rightTouchId = touch.identifier;
+                const rect = joystick.getBoundingClientRect();
+                rightStartX = rect.left + rect.width / 2;
+                rightStartY = rect.top + rect.height / 2;
+            }, { passive: false });
+
+            joystick.addEventListener("touchmove", (e) => {
+                e.preventDefault();
+                let touch = null;
+                for (let i = 0; i < e.touches.length; i++) {
+                    if (e.touches[i].identifier === rightTouchId) { touch = e.touches[i]; break; }
+                }
+                if (!touch) return;
+                let deltaX = touch.clientX - rightStartX;
+                let deltaY = touch.clientY - rightStartY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (distance > maxDistance) {
+                    const ratio = maxDistance / distance;
+                    deltaX *= ratio; deltaY *= ratio;
+                }
+                rightDeltaX = deltaX; rightDeltaY = deltaY;
+                knob.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+                updateMovement();
+            }, { passive: false });
+
+            const handleRightEnd = (e) => {
+                let wasActiveTouch = false;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === rightTouchId) { wasActiveTouch = true; break; }
+                }
+                if (wasActiveTouch) {
+                    rightTouchId = null;
+                    knob.style.transform = "translate(-50%, -50%)";
+                    rightDeltaX = 0; rightDeltaY = 0;
+                    updateMovement();
+                }
+            };
+            joystick.addEventListener("touchend", handleRightEnd);
+            joystick.addEventListener("touchcancel", handleRightEnd);
+
+            leftJoystick.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                leftTouchId = touch.identifier;
+                const rect = leftJoystick.getBoundingClientRect();
+                leftStartX = rect.left + rect.width / 2;
+                leftStartY = rect.top + rect.height / 2;
+            }, { passive: false });
+
+            leftJoystick.addEventListener("touchmove", (e) => {
+                e.preventDefault();
+                let touch = null;
+                for (let i = 0; i < e.touches.length; i++) {
+                    if (e.touches[i].identifier === leftTouchId) { touch = e.touches[i]; break; }
+                }
+                if (!touch) return;
+                let deltaX = touch.clientX - leftStartX;
+                let deltaY = touch.clientY - leftStartY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (distance > maxDistance) {
+                    const ratio = maxDistance / distance;
+                    deltaX *= ratio; deltaY *= ratio;
+                }
+                leftDeltaX = deltaX; leftDeltaY = deltaY;
+                leftKnob.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+                updateMovement();
+            }, { passive: false });
+
+            const handleLeftEnd = (e) => {
+                let wasActiveTouch = false;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === leftTouchId) { wasActiveTouch = true; break; }
+                }
+                if (wasActiveTouch) {
+                    leftTouchId = null;
+                    leftKnob.style.transform = "translate(-50%, -50%)";
+                    leftDeltaX = 0; leftDeltaY = 0;
+                    updateMovement();
+                }
+            };
+            leftJoystick.addEventListener("touchend", handleLeftEnd);
+            leftJoystick.addEventListener("touchcancel", handleLeftEnd);
+
+            let isDraggingRight = false, isDraggingLeft = false;
+            joystick.addEventListener("mousedown", (e) => {
+                isDraggingRight = true;
+                const rect = joystick.getBoundingClientRect();
+                rightStartX = rect.left + rect.width / 2;
+                rightStartY = rect.top + rect.height / 2;
+            });
+            leftJoystick.addEventListener("mousedown", (e) => {
+                isDraggingLeft = true;
+                const rect = leftJoystick.getBoundingClientRect();
+                leftStartX = rect.left + rect.width / 2;
+                leftStartY = rect.top + rect.height / 2;
+            });
+
+            window.addEventListener("mousemove", (e) => {
+                if (isDraggingRight) {
+                    let deltaX = e.clientX - rightStartX;
+                    let deltaY = e.clientY - rightStartY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    if (distance > maxDistance) {
+                        const ratio = maxDistance / distance;
+                        deltaX *= ratio; deltaY *= ratio;
+                    }
+                    rightDeltaX = deltaX; rightDeltaY = deltaY;
+                    knob.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+                    updateMovement();
+                }
+                if (isDraggingLeft) {
+                    let deltaX = e.clientX - leftStartX;
+                    let deltaY = e.clientY - leftStartY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    if (distance > maxDistance) {
+                        const ratio = maxDistance / distance;
+                        deltaX *= ratio; deltaY *= ratio;
+                    }
+                    leftDeltaX = deltaX; leftDeltaY = deltaY;
+                    leftKnob.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+                    updateMovement();
+                }
+            });
+
+            window.addEventListener("mouseup", () => {
+                if (isDraggingRight) {
+                    isDraggingRight = false;
+                    knob.style.transform = "translate(-50%, -50%)";
+                    rightDeltaX = 0; rightDeltaY = 0;
+                }
+                if (isDraggingLeft) {
+                    isDraggingLeft = false;
+                    leftKnob.style.transform = "translate(-50%, -50%)";
+                    leftDeltaX = 0; leftDeltaY = 0;
+                }
+                updateMovement();
+            });
+        }
+
+        function checkCollision(newX, newZ) {
+            const collisionRadius = 1.5;
+            for (let wall of maze) {
+                const dx = Math.abs(newX - wall.x);
+                const dz = Math.abs(newZ - wall.z);
+                if (dx < wall.width / 2 + collisionRadius && dz < wall.depth / 2 + collisionRadius) return true;
+            }
+            return false;
+        }
+
+        function spawnCoinParticles(x, y, z) {
+            for (let i = 0; i < 8; i++) {
+                const p = getParticle();
+                p.position.set(x, y, z);
+                p.userData = { vx: (Math.random() - 0.5) * 0.2, vy: Math.random() * 0.15 + 0.05, vz: (Math.random() - 0.5) * 0.2, life: 1.0 };
+                scene.add(p);
+                activeParticles.push(p);
+            }
+        }
+
+        function addHamsterTrail() {
+            if (powerUpActive || (Math.abs(moveRight) + Math.abs(moveForward)) > 0.5) {
+                const dotGeo = new THREE.SphereGeometry(0.1, 4, 4);
+                const dotMat = new THREE.MeshBasicMaterial({ color: powerUpActive ? 0xff3300 : 0xffaa00, transparent: true, opacity: 0.6 });
+                const dot = new THREE.Mesh(dotGeo, dotMat);
+                dot.position.copy(hamster.position);
+                dot.position.y = 0.2;
+                scene.add(dot);
+                trailParticles.push({ mesh: dot, life: 1.0, geometry: dotGeo, material: dotMat });
+            }
+        }
+
+        function updateTrailParticles() {
+            for (let i = trailParticles.length - 1; i >= 0; i--) {
+                trailParticles[i].life -= 0.03;
+                trailParticles[i].mesh.material.opacity = trailParticles[i].life * 0.6;
+                trailParticles[i].mesh.scale.multiplyScalar(0.95);
+                if (trailParticles[i].life <= 0) {
+                    scene.remove(trailParticles[i].mesh);
+                    trailParticles[i].geometry.dispose();
+                    trailParticles[i].material.dispose();
+                    trailParticles.splice(i, 1);
+                }
+            }
+        }
+
+        function checkCheeseCollection() {
+            if (gameOver || !gameStarted || levelClearPending) return;
+            cheeses.forEach((cheese) => {
+                if (!cheese.collected) {
+                    const dx = hamster.position.x - cheese.mesh.position.x;
+                    const dz = hamster.position.z - cheese.mesh.position.z;
+                    const distSq = dx * dx + dz * dz; // Squared distance optimization
+                    const thresholdSq = cheese.isPowerUp ? 6.25 : 4.84; // 2.5^2 and 2.2^2
+                    
+                    if (distSq < thresholdSq) {
+                        cheese.collected = true;
+                        scene.remove(cheese.mesh);
+
+                        if (cheese.isPowerUp) {
+                            sfx.powerup();
+                            powerUpActive = true;
+                            powerUpTimer = Date.now() + POWERUP_DURATION;
+                            hamsterSpeed = BONUS_HAMSTER_SPEED * hamsterSpeedMultiplier;
+                            const powerUpEl = document.getElementById("powerUpUI");
+                            powerUpEl.style.display = "block";
+                            powerUpEl.classList.add("active");
+                            createPowerUpBurst(cheese.mesh.position);
+                            addScore(500, cheese.mesh);
+                        } else {
+                            sfx.collect();
+                            spawnCoinParticles(cheese.mesh.position.x, cheese.mesh.position.y, cheese.mesh.position.z);
+                            score++;
+                            document.getElementById("score").textContent = score;
+                            addScore(100, cheese.mesh);
+                            if (score === totalCheesesInLevel) {
+                                setTimeout(() => { showLevelClearModal(); }, 100);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateHamster() {
+            if (gameOver || !hamster || !gameStarted || levelClearPending) return;
+            const newX = hamster.position.x + moveRight * hamsterSpeed * 10;
+            const newZ = hamster.position.z + moveForward * hamsterSpeed * 10;
+            if (!checkCollision(newX, hamster.position.z)) hamster.position.x = newX;
+            if (!checkCollision(hamster.position.x, newZ)) hamster.position.z = newZ;
+            if (Math.abs(moveRight) > 0.1 || Math.abs(moveForward) > 0.1) {
+                const angle = Math.atan2(moveRight, moveForward);
+                hamster.rotation.y = angle;
+                hamster.position.y = Math.abs(Math.sin(Date.now() * 0.01)) * 0.2;
+            } else {
+                hamster.position.y = 0;
+            }
+            const config = zoomConfigs[zoomLevel];
+            if (!isTransitioning) {
+                camera.position.x = hamster.position.x;
+                camera.position.z = hamster.position.z + config.distance;
+                camera.position.y = config.height;
+                camera.lookAt(hamster.position);
+            }
+            checkCheeseCollection();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (powerUpActive) {
+                const remaining = Math.max(0, powerUpTimer - Date.now());
+                document.getElementById("powerUpTimer").textContent = (remaining / 1000).toFixed(1);
+                powerUpPulse = Math.sin(Date.now() * 0.01) * 0.15;
+                if (hamster) hamster.scale.set(1.6 + powerUpPulse, 1.6 + powerUpPulse, 1.6 + powerUpPulse);
+                if (remaining <= 0) {
+                    powerUpActive = false;
+                    hamsterSpeed = BASE_HAMSTER_SPEED * hamsterSpeedMultiplier;
+                    const powerUpEl = document.getElementById("powerUpUI");
+                    powerUpEl.style.display = "none";
+                    powerUpEl.classList.remove("active");
+                    if (hamster) hamster.scale.set(1.6, 1.6, 1.6);
+                }
+            }
+
+            updateHamster();
+
+            cheeses.forEach((cheese) => {
+                if (!cheese.collected && !cheese.isPowerUp) {
+                    cheese.mesh.rotation.z += 0.05;
+                    cheese.mesh.position.y = 0.5 + Math.sin(Date.now() * 0.004) * 0.15;
+                }
+            });
+
+            for (let i = activeParticles.length - 1; i >= 0; i--) {
+                const p = activeParticles[i];
+                p.position.x += p.userData.vx;
+                p.position.y += p.userData.vy;
+                p.position.z += p.userData.vz;
+                p.userData.vy -= 0.008;
+                p.userData.life -= 0.04;
+                p.material.opacity = p.userData.life;
+                p.rotation.x += 0.15;
+                p.rotation.y += 0.15;
+                if (p.userData.life <= 0) {
+                    releaseParticle(p);
+                    activeParticles.splice(i, 1);
+                }
+            }
+
+            if (gameStarted && !gameOver && !levelClearPending) {
+                addHamsterTrail();
+                updateTrailParticles();
+                const isMoving = Math.abs(moveRight) > 0.1 || Math.abs(moveForward) > 0.1;
+                if (isMoving) {
+                    const now = Date.now();
+                    const speedFactor = Math.min(1.0, Math.sqrt(moveRight * moveRight + moveForward * moveForward));
+                    const stepDelay = 250 - speedFactor * 150;
+                    if (now - lastStepTime > stepDelay) {
+                        sfx.playScurry(speedFactor);
+                        lastStepTime = now;
+                    }
+                }
+                const allEnemies = [...cats, ...guardCats];
+                updateProximityAudio(hamster, allEnemies, performance.now());
+            }
+
+            updateBalls();
+            updateGuardCats();
+            updateCats();
+            checkCatCollision();
+            checkCityBoundaries();
+            renderer.render(scene, camera);
+        }
+
+        // ─── OPTIONS MENU LOGIC ───
+        const practiceToggle = document.getElementById("practiceModeToggle");
+        const hamsterSlider = document.getElementById("hamsterSpeedSlider");
+        const catSlider = document.getElementById("catSpeedSlider");
+        const hamsterVal = document.getElementById("hamsterSpeedVal");
+        const catVal = document.getElementById("catSpeedVal");
+
+        function loadOptions() {
+            const savedOptions = localStorage.getItem("pawGlowOptions");
+            if (savedOptions) {
+                try {
+                    const opts = JSON.parse(savedOptions);
+                    practiceModeEnabled = opts.practiceMode || false;
+                    hamsterSpeedMultiplier = opts.hamsterSpeed || 1.0;
+                    catSpeedMultiplier = opts.catSpeed || 1.0;
+                } catch (e) {}
+            }
+            practiceToggle.checked = practiceModeEnabled;
+            hamsterSlider.value = hamsterSpeedMultiplier;
+            catSlider.value = catSpeedMultiplier;
+            hamsterVal.textContent = hamsterSpeedMultiplier.toFixed(1) + "x";
+            catVal.textContent = catSpeedMultiplier.toFixed(1) + "x";
+            applyPracticeMode();
+        }
+
+        function saveOptions() {
+            localStorage.setItem("pawGlowOptions", JSON.stringify({
+                practiceMode: practiceModeEnabled,
+                hamsterSpeed: hamsterSpeedMultiplier,
+                catSpeed: catSpeedMultiplier,
+            }));
+        }
+
+        function applyPracticeMode() {
+            if (practiceModeEnabled) {
+                hamsterSlider.disabled = true;
+                catSlider.disabled = true;
+                hamsterVal.classList.add("disabled");
+                catVal.classList.add("disabled");
+                hamsterSpeedMultiplier = 0.3;
+                catSpeedMultiplier = 0.3;
+                hamsterVal.textContent = "0.3x (Locked)";
+                catVal.textContent = "0.3x (Locked)";
+            } else {
+                hamsterSlider.disabled = false;
+                catSlider.disabled = false;
+                hamsterVal.classList.remove("disabled");
+                catVal.classList.remove("disabled");
+                hamsterSpeedMultiplier = parseFloat(hamsterSlider.value);
+                catSpeedMultiplier = parseFloat(catSlider.value);
+                hamsterVal.textContent = hamsterSpeedMultiplier.toFixed(1) + "x";
+                catVal.textContent = catSpeedMultiplier.toFixed(1) + "x";
+            }
+            saveOptions();
+        }
+
+        practiceToggle.addEventListener("change", (e) => {
+            practiceModeEnabled = e.target.checked;
+            applyPracticeMode();
+        });
+
+        hamsterSlider.addEventListener("input", (e) => {
+            if (!practiceModeEnabled) {
+                hamsterSpeedMultiplier = parseFloat(e.target.value);
+                hamsterVal.textContent = hamsterSpeedMultiplier.toFixed(1) + "x";
+                saveOptions();
+            }
+        });
+
+        catSlider.addEventListener("input", (e) => {
+            if (!practiceModeEnabled) {
+                catSpeedMultiplier = parseFloat(e.target.value);
+                catVal.textContent = catSpeedMultiplier.toFixed(1) + "x";
+                saveOptions();
+            }
+        });
+
+        document.getElementById("openOptionsBtn").addEventListener("click", () => {
+            document.getElementById("startMenu").style.display = "none";
+            document.getElementById("optionsMenu").style.display = "flex";
+        });
+
+        document.getElementById("backToMenuFromOptionsBtn").addEventListener("click", () => {
+            document.getElementById("optionsMenu").style.display = "none";
+            document.getElementById("startMenu").style.display = "flex";
+        });
+
+        loadOptions();
+        init();
+    </script>
+</body>
+</html>

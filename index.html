@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="CityUnicorn Vault — your vault of awesome HTML5 browser games." />
+  <meta name="theme-color" content="#0b0a1a" />
+  <title>CityUnicorn Vault 🦄</title>
+  <style>
+    /* ---------- Reset & Base ---------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #0b0a1a; --bg-soft: #15132a; --card: #1c1933; --card-hover: #252143;
+      --text: #e8e6ff; --text-dim: #a8a4d4; --accent: #c77dff; --accent-2: #7ad9ff;
+      --accent-3: #ff8ad1; --border: #2a2748; --radius: 14px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --glow: 0 0 15px rgba(199, 125, 255, 0.4); --glow-intense: 0 0 30px rgba(199, 125, 255, 0.7);
+    }
+    body.frenzy-mode {
+      --bg: #1a001a; --bg-soft: #2d002d; --card: #3a003a; --card-hover: #4a004a;
+      --accent: #ff00ff; --accent-2: #00ffff; --accent-3: #ffff00; --border: #ff00ff;
+      --glow: 0 0 25px rgba(255, 0, 255, 0.8); --glow-intense: 0 0 50px rgba(255, 0, 255, 1);
+      animation: frenzyShake 0.5s ease-in-out;
+    }
+    @keyframes frenzyShake { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-2px, 2px); } 75% { transform: translate(2px, -2px); } }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font); background: radial-gradient(ellipse at top, #1a1635 0%, var(--bg) 60%);
+      color: var(--text); line-height: 1.6; min-height: 100vh;
+      display: flex; flex-direction: column; transition: background 0.5s ease; overflow-x: hidden;
+    }
+    a { color: var(--accent-2); text-decoration: none; transition: all 0.2s; }
+    a:hover { color: var(--accent-3); text-decoration: underline; }
+    .container { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 1.25rem; }
+    .crt-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px; pointer-events: none; z-index: 9999; opacity: 0.3;
+    }
+    @keyframes rainbowCycle { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+    body.frenzy-mode .site-header, body.frenzy-mode .hero, body.frenzy-mode .games-grid { animation: rainbowCycle 3s linear infinite; }
+
+    /* ---------- Header ---------- */
+    .site-header { position: sticky; top: 0; z-index: 100; background: rgba(11, 10, 26, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); transition: all 0.5s ease; }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; flex-wrap: wrap; gap: 0.5rem; }
+    .logo-wrapper { display: flex; flex-direction: column; gap: 0.2rem; }
+    .logo { display: flex; align-items: center; gap: 0.6rem; font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .logo-mark { font-size: 1.6rem; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    .logo-text em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .creator-badge { font-size: 0.75rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.3rem; font-weight: 500; letter-spacing: 0.5px; }
+    .creator-badge .star { animation: starPulse 1.5s ease-in-out infinite; display: inline-block; }
+    @keyframes starPulse { 0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; } 50% { transform: scale(1.3) rotate(180deg); opacity: 0.8; } }
+    .nav { display: flex; gap: 1.4rem; }
+    .nav a { color: var(--text-dim); font-weight: 500; }
+    .nav a:hover { color: var(--text); text-decoration: none; }
+    .frenzy-btn {
+      background: transparent; border: 1px solid var(--accent); color: var(--accent);
+      padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 0.4rem;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .frenzy-btn:hover { background: var(--accent); color: var(--bg); box-shadow: var(--glow-intense); transform: scale(1.05); }
+    body.frenzy-mode .frenzy-btn { animation: frenzyPulse 0.8s infinite, rainbowCycle 2s linear infinite; border-color: transparent; }
+    @keyframes frenzyPulse { 0%, 100% { box-shadow: 0 0 15px var(--accent); } 50% { box-shadow: 0 0 35px var(--accent), 0 0 60px var(--accent-2); } }
+
+    /* ---------- Hero ---------- */
+    .hero { padding: 4rem 0 2.5rem; text-align: center; }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); margin-bottom: 0.75rem; background: linear-gradient(90deg, var(--accent-2), var(--accent), var(--accent-3)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(199, 125, 255, 0.3); }
+    .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2rem; }
+    .search-wrap { position: relative; max-width: 540px; margin: 0 auto 1.5rem; }
+    #searchInput { width: 100%; padding: 1rem 1.25rem 1rem 3rem; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 999px; color: var(--text); font-size: 1rem; outline: none; transition: all 0.3s; }
+    #searchInput::placeholder { color: var(--text-dim); }
+    #searchInput:focus { border-color: var(--accent); box-shadow: var(--glow-intense); transform: scale(1.02); }
+    .search-icon { position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7; }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 2rem; }
+    .chip { background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-dim); padding: 0.6rem 1.2rem; border-radius: 999px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s; }
+    .chip:hover { color: var(--text); border-color: var(--accent); transform: translateY(-2px); }
+    .chip.active { background: linear-gradient(90deg, var(--accent), var(--accent-3)); color: #0b0a1a; border-color: transparent; font-weight: 700; box-shadow: var(--glow); }
+
+    /* ---------- FEATURED GAME SECTION ---------- */
+    .featured-section { margin: 2rem 0 3rem; position: relative; }
+    .featured-header { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, var(--accent-2), var(--accent-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .featured-badge { animation: crownBounce 1.5s ease-in-out infinite; font-size: 1.5rem; }
+    @keyframes crownBounce { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(-10deg); } }
+    .featured-card {
+      background: linear-gradient(135deg, var(--card), var(--card-hover));
+      border: 2px solid var(--accent); border-radius: 20px;
+      padding: 2rem; position: relative; overflow: hidden;
+      box-shadow: var(--glow-intense), inset 0 0 40px rgba(199, 125, 255, 0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: grid; grid-template-columns: 150px 1fr; gap: 2rem;
+      align-items: center; cursor: pointer;
+    }
+    .featured-card::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(199, 125, 255, 0.1), transparent);
+      animation: spotlightShine 3s linear infinite;
+    }
+    @keyframes spotlightShine { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+    .featured-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: var(--glow-intense), 0 0 60px rgba(199, 125, 255, 0.5); border-color: var(--accent-3); }
+    .featured-emoji { font-size: 6rem; text-align: center; position: relative; z-index: 1; animation: emojiFloat 2s ease-in-out infinite; }
+    @keyframes emojiFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .featured-content { position: relative; z-index: 1; }
+    .featured-title { font-size: 2rem; margin-bottom: 0.5rem; font-weight: 800; background: linear-gradient(90deg, var(--text), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .featured-desc { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 1rem; }
+    .featured-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .featured-tag { background: linear-gradient(90deg, var(--accent), var(--accent-3)); color: #0b0a1a; padding: 0.4rem 1rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; text-transform: capitalize; }
+    .countdown { color: var(--accent-2); font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .countdown-number { background: var(--bg-soft); padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); font-family: monospace; font-size: 1rem; }
+    .next-up { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.5rem; font-style: italic; }
+    .next-up span { color: var(--accent-3); font-weight: 700; font-style: normal; }
+    .play-featured-btn {
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+      color: #0b0a1a; padding: 0.8rem 2rem; border-radius: 999px;
+      font-weight: 800; font-size: 1rem; border: none; cursor: pointer;
+      transition: all 0.3s; margin-top: 1rem; box-shadow: var(--glow);
+    }
+    .play-featured-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px var(--accent-3); }
+
+    /* ---------- Games Grid ---------- */
+    .section-title { font-size: 1.6rem; margin: 2.5rem 0 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .result-count { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; padding-bottom: 3rem; }
+    .game-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; cursor: pointer; position: relative; }
+    .game-card:hover { transform: translateY(-8px) scale(1.02); background: var(--card-hover); border-color: var(--accent); box-shadow: var(--glow-intense); }
+    .game-card:active { transform: translateY(-4px) scale(0.98); }
+    .game-thumb { height: 150px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; background: linear-gradient(135deg, #2a1d4f, #3d1f5e); position: relative; overflow: hidden; transition: all 0.3s; }
+    .game-card:hover .game-thumb { transform: scale(1.1); background: linear-gradient(135deg, var(--accent), var(--accent-3)); }
+    .game-thumb::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%); }
+    .game-info { padding: 1.1rem; flex: 1; display: flex; flex-direction: column; }
+    .game-title { font-size: 1.1rem; margin-bottom: 0.4rem; color: var(--text); font-weight: 700; }
+    .game-desc { color: var(--text-dim); font-size: 0.9rem; flex: 1; margin-bottom: 0.8rem; line-height: 1.5; }
+    .game-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-dim); }
+    .game-tag { background: var(--bg-soft); padding: 0.25rem 0.7rem; border-radius: 999px; text-transform: capitalize; border: 1px solid var(--border); font-weight: 600; }
+    .play-btn { background: var(--accent); color: #0b0a1a; padding: 0.5rem 1rem; border-radius: 999px; font-weight: 700; border: none; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; }
+    .play-btn:hover { background: var(--accent-3); box-shadow: 0 0 20px var(--accent-3); transform: scale(1.1); }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-dim); font-size: 1.05rem; }
+
+    /* ---------- About & Footer ---------- */
+    .about { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 3rem 0; }
+    .about h2 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent-2); }
+    .about p { color: var(--text-dim); max-width: 760px; }
+    .site-footer { background: #08071a; border-top: 1px solid var(--border); padding-top: 2.5rem; margin-top: auto; }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; padding-bottom: 2rem; }
+    .site-footer h3 { font-size: 1.05rem; margin-bottom: 0.8rem; color: var(--text); }
+    .site-footer p { color: var(--text-dim); font-size: 0.9rem; }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 0.5rem; color: var(--text-dim); font-size: 0.9rem; }
+    .footer-bottom { border-top: 1px solid var(--border); text-align: center; padding: 1.5rem 1rem; color: var(--text-dim); font-size: 0.85rem; }
+    .qwen-badge { display: inline-block; margin-top: 0.5rem; padding: 0.3rem 0.8rem; background: rgba(199, 125, 255, 0.1); border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); font-weight: 600; font-size: 0.8rem; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 768px) {
+      .nav { display: none; }
+      .hero { padding: 2.5rem 0 1.5rem; }
+      .featured-card { grid-template-columns: 1fr; text-align: center; padding: 1.5rem; }
+      .featured-emoji { font-size: 4rem; }
+      .featured-title { font-size: 1.5rem; }
+      .featured-meta { justify-content: center; }
+      .game-thumb { height: 130px; font-size: 3rem; }
+      .frenzy-btn { margin-left: auto; padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="crt-overlay"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo-wrapper">
+        <a href="#" class="logo">
+          <span class="logo-mark"></span>
+          <span class="logo-text">CityUnicorn <em>Vault</em></span>
+        </a>
+        <span class="creator-badge"><span class="star">✨</span> By CityUnicorn</span>
+      </div>
+      <nav class="nav">
+        <a href="#games">Games</a>
+        <a href="#about">About</a>
+        <a href="#license">License</a>
+      </nav>
+      <button class="frenzy-btn" id="frenzyBtn">⚡ Frenzy</button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <h1>Discover. Play. Repeat.</h1>
+      <p class="subtitle">A handpicked vault of HTML5 browser games — no installs, just click and play.</p>
+      <div class="search-wrap">
+        <input id="searchInput" type="search" placeholder="Search games by name, tag, or category…" aria-label="Search games" autocomplete="off" />
+        <span class="search-icon" aria-hidden="true"></span>
+      </div>
+      <div class="filter-chips" id="filterChips">
+        <button class="chip active" data-category="all">All</button>
+        <button class="chip" data-category="arcade">Arcade</button>
+        <button class="chip" data-category="puzzle">Puzzle</button>
+        <button class="chip" data-category="action">Action</button>
+        <button class="chip" data-category="racing">Racing</button>
+        <button class="chip" data-category="adventure">Adventure</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED GAME OF THE WEEK -->
+  <section class="container featured-section" id="featuredSection">
+    <div class="featured-header">
+      <span class="featured-badge">👑</span>
+      <span>Game of the Week</span>
+    </div>
+    <div class="featured-card" id="featuredCard">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- Games grid -->
+  <main class="container" id="games">
+    <h2 class="section-title"> The Vault</h2>
+    <p class="result-count" id="resultCount">Loading games...</p>
+    <div class="games-grid" id="gamesGrid"></div>
+    <p class="empty-state" id="emptyState" hidden>No games match your search. Try a different keyword 🦄</p>
+  </main>
+
+  <!-- About -->
+  <section class="about" id="about">
+    <div class="container">
+      <h2>About CityUnicorn Vault</h2>
+      <p>CityUnicorn Vault is a curated, zero-bloat collection of free HTML5 games that run right in your browser. Whether you're into quick arcade runs, brain-bending puzzles, or high-speed racing — there's something here for every kind of player. Built for speed, designed for fun.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer" id="license">
+    <div class="container footer-grid">
+      <div>
+        <h3>CityUnicorn Vault</h3>
+        <p>A community-curated vault of HTML5 browser games.</p>
+      </div>
+      <div>
+        <h3>Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="#games">Games</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#">Submit a Game</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>License</h3>
+        <ul class="footer-links">
+          <li>Code: <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a></li>
+          <li>Content: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© <span id="year"></span> CityUnicorn Vault. Made with 🦄 by unicorns, for unicorns.</p>
+      <span class="qwen-badge">Human + AI Collaboration #qwenai ❤️</span>
+    </div>
+  </footer>
+
+  <script>
+    // CityUnicorn Vault V5 — The Auto-Pilot Edition
+    
+    // 🎮 GAME DATABASE
+    const games = [
+      { id: 1,  title: "Paw Glow",        emoji: "🐹", category: "arcade",   desc: "Collect coins while avoiding stealth cats and a fox.", tags: ["hamster", "cats", "maze"], url: "games/paw-glow/index.html" },
+      { id: 2,  title: "Unicorn Fighter",     emoji: "🦄", category: "arcade",   desc: "A space shooter.",      tags: ["space", "shooter", "retro"], url: "games/unicorn-fighter/index.html" },
+      { id: 3,  title: "Puzzle Pop",        emoji: "🧩", category: "puzzle",   desc: "Match colorful pieces to clear the board.",  tags: ["match", "casual", "colorful"], url: "#" },
+      { id: 4,  title: "Dragon Quest",      emoji: "🐉", category: "adventure",desc: "Embark on a quest through magical lands.",  tags: ["rpg", "fantasy", "quest"], url: "#" },
+      { id: 5,  title: "Space Shooter",     emoji: "🚀", category: "action",   desc: "Defend the galaxy from incoming waves.",     tags: ["shoot", "space", "arcade"], url: "#" },
+      { id: 6,  title: "Tower Defense",     emoji: "🏰", category: "strategy", desc: "Build towers, stop the horde.",             tags: ["defense", "tactics", "build"], url: "#" },
+      { id: 7,  title: "Snake Rewind",      emoji: "", category: "arcade",   desc: "The classic snake — with a neon twist.",     tags: ["classic", "retro", "snake"], url: "#" },
+      { id: 8,  title: "Memory Match",      emoji: "🃏", category: "puzzle",   desc: "Flip cards and find the matching pairs.",    tags: ["memory", "cards", "brain"], url: "#" },
+      { id: 9,  title: "Pixel Knight",      emoji: "⚔️", category: "action",   desc: "Slash through dungeons pixel by pixel.",     tags: ["pixel", "sword", "dungeon"], url: "#" },
+      { id: 10, title: "Unicorn Run",       emoji: "🦄", category: "adventure",desc: "Run, jump, and sparkle through dreams.",     tags: ["platformer", "cute", "run"], url: "#" },
+      { id: 11, title: "Drift King",        emoji: "🏁", category: "racing",   desc: "Master the perfect drift on every corner.", tags: ["drift", "car", "skill"], url: "#" },
+      { id: 12, title: "Maze Runner",       emoji: "🌀", category: "puzzle",   desc: "Find your way out of shifting mazes.",      tags: ["maze", "logic", "escape"], url: "#" },
+    ];
+
+    //  AUTOMATION CONFIGURATION
+    // The "Epoch" date. The cycle starts here. (Today: Aug 17, 2026)
+    const EPOCH_DATE = new Date('2026-08-17T00:00:00'); 
+    const WEEK_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
+    let activeCategory = "all";
+    let searchQuery = "";
+
+    const grid = document.getElementById("gamesGrid");
+    const searchInput = document.getElementById("searchInput");
+    const filterChips = document.getElementById("filterChips");
+    const resultCount = document.getElementById("resultCount");
+    const emptyState = document.getElementById("emptyState");
+    const yearEl = document.getElementById("year");
+    const frenzyBtn = document.getElementById("frenzyBtn");
+    const featuredCard = document.getElementById("featuredCard");
+
+    yearEl.textContent = new Date().getFullYear();
+
+    // 🤖 AUTO-SCHEDULING LOGIC
+    function getScheduleData() {
+      const now = new Date();
+      // Calculate how many full weeks have passed since the epoch
+      const weeksElapsed = Math.floor((now - EPOCH_DATE) / WEEK_MS);
+      
+      // Determine current and next featured game indices (cycling through the array)
+      // We offset by 9 so that index 0 starts with "Unicorn Run" (id: 10) for continuity!
+      const startIndex = 9; 
+      const currentIdx = (startIndex + weeksElapsed) % games.length;
+      const nextIdx = (startIndex + weeksElapsed + 1) % games.length;
+      
+      // Calculate exactly when the next week begins for the countdown
+      const nextResetDate = new Date(EPOCH_DATE.getTime() + (weeksElapsed + 1) * WEEK_MS);
+      
+      return {
+        current: games[currentIdx],
+        next: games[nextIdx],
+        resetDate: nextResetDate
+      };
+    }
+
+    // Render Featured Game
+    function renderFeaturedGame() {
+      const schedule = getScheduleData();
+      const featured = schedule.current;
+
+      featuredCard.innerHTML = `
+        <div class="featured-emoji">${featured.emoji}</div>
+        <div class="featured-content">
+          <h2 class="featured-title">${featured.title}</h2>
+          <p class="featured-desc">${featured.desc}</p>
+          <div class="featured-meta">
+            <span class="featured-tag">${featured.category}</span>
+            <span class="countdown">
+              <span>⏰</span>
+              <span>Ends in:</span>
+              <span class="countdown-number" id="daysLeft">0</span>d
+              <span class="countdown-number" id="hoursLeft">0</span>h
+              <span class="countdown-number" id="minsLeft">0</span>m
+              <span class="countdown-number" id="secsLeft">0</span>s
+            </span>
+          </div>
+          <div class="next-up">Next week: <span>${schedule.next.emoji} ${schedule.next.title}</span></div>
+          <button class="play-featured-btn" onclick="launchGame(${featured.id})">
+            Play Now ▶
+          </button>
+        </div>
+      `;
+      
+      updateCountdown(schedule.resetDate);
+    }
+
+    function updateCountdown(targetDate) {
+      const now = new Date();
+      const diff = targetDate - now;
+      
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        document.getElementById('daysLeft').textContent = days;
+        document.getElementById('hoursLeft').textContent = hours;
+        document.getElementById('minsLeft').textContent = mins;
+        document.getElementById('secsLeft').textContent = secs;
+      } else {
+        // If it hits zero, refresh the schedule immediately
+        renderFeaturedGame();
+      }
+    }
+
+    function launchGame(id) {
+      const game = games.find(g => g.id === id);
+      if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+      
+      if (game.url && game.url !== "#") {
+        window.open(game.url, '_blank');
+      } else {
+        alert(`🎮 Launching "${game.title}"!\n\nAdd your game URL in the games array!`);
+      }
+    }
+
+    function renderGames() {
+      const filtered = games.filter(game => {
+        const matchesCategory = activeCategory === "all" || game.category === activeCategory;
+        const q = searchQuery.toLowerCase().trim();
+        const matchesSearch = !q ||
+          game.title.toLowerCase().includes(q) ||
+          game.desc.toLowerCase().includes(q) ||
+          game.category.toLowerCase().includes(q) ||
+          game.tags.some(tag => tag.toLowerCase().includes(q));
+        return matchesCategory && matchesSearch;
+      });
+
+      grid.innerHTML = filtered.map(game => `
+        <article class="game-card" data-id="${game.id}" onclick="launchGame(${game.id})">
+          <div class="game-thumb" aria-hidden="true">${game.emoji}</div>
+          <div class="game-info">
+            <h3 class="game-title">${game.title}</h3>
+            <p class="game-desc">${game.desc}</p>
+            <div class="game-meta">
+              <span class="game-tag">${game.category}</span>
+              <button class="play-btn" type="button" onclick="event.stopPropagation(); launchGame(${game.id})">Play ▶</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+
+      resultCount.textContent = (searchQuery || activeCategory !== "all") 
+        ? `Showing ${filtered.length} of ${games.length} games` 
+        : `Showing all ${games.length} games`;
+
+      emptyState.hidden = filtered.length !== 0;
+    }
+
+    searchInput.addEventListener("input", e => { searchQuery = e.target.value; renderGames(); });
+    
+    filterChips.addEventListener("click", e => {
+      const chip = e.target.closest(".chip");
+      if (!chip) return;
+      filterChips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      activeCategory = chip.dataset.category;
+      renderGames();
+    });
+
+    frenzyBtn.addEventListener("click", () => {
+      document.body.classList.toggle("frenzy-mode");
+      const isFrenzy = document.body.classList.contains("frenzy-mode");
+      frenzyBtn.innerHTML = isFrenzy ? "🔥 ACTIVE" : "⚡ Frenzy";
+      if (navigator.vibrate) navigator.vibrate(isFrenzy ? [50, 50, 50] : 30);
+    });
+
+    // Initialize
+    renderFeaturedGame();
+    renderGames();
+    
+    // Tick the countdown every second
+    setInterval(() => {
+      const schedule = getScheduleData();
+      updateCountdown(schedule.resetDate);
+    }, 1000);
+  </script>
+</body>
+</html>

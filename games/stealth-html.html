@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Stealth HTML Coder v1.0 - CityUnicorn Studio</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            touch-action: manipulation; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* --- START MENU & PARTICLE STYLES --- */
+        .menu-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, #18682a 0%, #318f3a 50%, #87a858 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+        }
+
+        .menu-overlay.hidden { display: none !important; }
+
+        #particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .droplet {
+            position: absolute;
+            bottom: -30px;
+            background: rgba(255, 255, 255, 0.28);
+            border-radius: 50%;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 0 6px rgba(255, 255, 255, 0.15);
+            animation: riseAndSway linear forwards;
+        }
+
+        @keyframes riseAndSway {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 0.35; }
+            90% { opacity: 0.35; }
+            100% { transform: translateY(-108vh) translateX(var(--sway-distance)); opacity: 0; }
+        }
+
+        .menu-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .subtitle {
+            color: #e5cc28;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            line-height: 1.2;
+        }
+
+        .button-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+
+        .btn-menu {
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+            font-family: inherit;
+        }
+
+        .btn-start {
+            background: linear-gradient(180deg, #4da941 0%, #328a2a 100%);
+            box-shadow: 0 8px 20px rgba(18, 64, 18, 0.4);
+        }
+
+        .btn-license {
+            background: linear-gradient(180deg, #1b85f3 0%, #0d63cf 100%);
+            box-shadow: 0 8px 20px rgba(10, 48, 100, 0.4);
+        }
+
+        .btn-menu:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-version {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- LICENSING MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #1e2820;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 380px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+            transform: translateY(20px);
+            transition: transform 0.25s ease;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .modal-overlay.active .modal-card { transform: translateY(0); }
+
+        .modal-header {
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .modal-header h2 { font-size: 18px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px; }
+
+        .modal-close-icon {
+            background: none; border: none; color: rgba(255, 255, 255, 0.6);
+            font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #d1d5db;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .modal-body h3 { color: #ffffff; font-size: 15px; margin: 16px 0 6px 0; }
+        .modal-body h3:first-child { margin-top: 0; }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .btn-close-modal {
+            width: 100%; padding: 12px; background: #334135;
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50px;
+            color: #ffffff; font-weight: 700; font-size: 15px; cursor: pointer;
+        }
+
+        /* --- GAME ENGINE STYLES --- */
+        .header {
+            background: #111;
+            padding: 6px 10px;
+            border-bottom: 2px solid #00ff41;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
+        }
+
+        .stats { display: flex; gap: 10px; font-size: 0.8rem; font-family: 'Courier New', monospace; }
+
+        .security-container {
+            background: #111;
+            padding: 6px 10px;
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .security-label {
+            display: flex; justify-content: space-between;
+            font-size: 0.7rem; color: #ff4444; margin-bottom: 3px; font-weight: bold;
+        }
+
+        .security-bar-bg {
+            width: 100%; height: 8px; background: #222;
+            border-radius: 4px; overflow: hidden; border: 1px solid #ff4444;
+        }
+
+        .security-bar-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #ff8800, #ff0000);
+            transition: width 0.2s ease; box-shadow: 0 0 8px #ff0000;
+        }
+
+        .game-area {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 6px 10px; justify-content: space-evenly; overflow: hidden;
+            font-family: 'Courier New', monospace;
+        }
+
+        .mission-box {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px dashed #00ff41; border-radius: 6px;
+            padding: 6px 8px; text-align: center;
+        }
+
+        .mission-label { font-size: 0.65rem; color: #888; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .target-code {
+            font-size: 1rem; color: #fff; letter-spacing: 1px;
+            text-shadow: 0 0 8px #00ff41; word-break: break-all;
+        }
+
+        .tag-tip { font-size: 0.7rem; color: #00ff41; margin-top: 4px; font-style: italic; opacity: 0.95; }
+
+        .preview-box {
+            background: #151515; border: 1px solid #00ff41; border-radius: 6px;
+            padding: 6px; min-height: 36px; max-height: 55px; color: #fff;
+            font-family: sans-serif; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        .input-box {
+            background: #000; border: 2px solid #333; border-radius: 6px;
+            padding: 8px 10px; min-height: 40px; font-size: 1rem; color: #00ff41;
+            position: relative; display: flex; align-items: center; flex-wrap: wrap; word-break: break-all;
+        }
+
+        .input-box.correct { border-color: #00ff41; box-shadow: 0 0 8px #00ff41; }
+        .input-box.error { border-color: #ff4444; box-shadow: 0 0 8px #ff4444; }
+
+        .cursor {
+            display: inline-block; width: 2px; height: 1rem;
+            background: #00ff41; animation: blink 1s infinite; margin-left: 2px;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .char-correct { color: #00ff41; }
+        .char-wrong { color: #ff4444; text-decoration: underline; }
+
+        /* KEYBOARD LAYOUT */
+        .keyboard {
+            background: #1a1a1a; padding: 4px 2px 8px 2px; border-top: 2px solid #333;
+            display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .key-row { display: flex; justify-content: center; gap: 2px; width: 100%; }
+
+        .key {
+            background: #2a2a2a; color: #fff; border: 1px solid #444;
+            border-radius: 4px; padding: 8px 0; font-size: 0.85rem; font-weight: bold;
+            cursor: pointer; transition: background 0.1s; flex: 1; min-width: 0; text-align: center;
+        }
+
+        .key:active { background: #00ff41; color: #000; }
+        .key.special { background: #333; color: #00ff41; }
+        .key.backspace { background: #ff4444; color: #fff; flex: 1.4; }
+        .key.space { flex: 3; }
+
+        /* GAME OVER OVERLAY */
+        .overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 10, 10, 0.98); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 600; padding: 20px; text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .overlay.hidden { display: none !important; }
+        .overlay h1.caught { color: #ff4444; text-shadow: 0 0 10px #ff4444; font-size: 1.6rem; }
+        .overlay h1.success { color: #00ff41; text-shadow: 0 0 10px #00ff41; font-size: 1.6rem; }
+        .overlay p { color: #aaa; margin: 6px 0; font-size: 0.85rem; }
+
+        .btn-game {
+            background: #00ff41; color: #000; border: none; padding: 14px 28px;
+            font-size: 1rem; font-weight: bold; border-radius: 6px; cursor: pointer;
+            margin-top: 16px; font-family: 'Courier New', monospace; box-shadow: 0 0 10px rgba(0,255,65,0.4);
+        }
+
+        .footer {
+            text-align: center; padding: 4px; font-size: 0.65rem; color: #666;
+            background: #0a0a0a; flex-shrink: 0; font-family: 'Courier New', monospace;
+        }
+        .footer span { color: #00ff41; font-weight: bold; }
+
+        .shake { animation: shake 0.3s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- START MENU OVERLAY -->
+    <div class="menu-overlay" id="startMenuOverlay">
+        <div id="particle-container"></div>
+
+        <div class="menu-container">
+            <div class="subtitle">CITYUNICORN STUDIO PRESENTS</div>
+            <h1 class="menu-title">STEALTH HTML <span class="emoji">👨‍💻</span></h1>
+
+            <div class="button-group">
+                <button class="btn-menu btn-start" id="startBtn" onclick="startGame()">
+                    <span>🎮</span> Start Game
+                </button>
+
+                <button class="btn-menu btn-license" onclick="openLicensing()">
+                    <span>📄</span> Licensing Info
+                </button>
+            </div>
+
+            <div class="menu-version">v1.0 • Mobile Edition<br><span style="font-size:11px; opacity:0.8;">Human + Team AI (#gemini & #qwenai ❤️)</span></div>
+        </div>
+    </div>
+
+    <!-- LICENSING MODAL -->
+    <div class="modal-overlay" id="licensingModal" onclick="handleOverlayClick(event)">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>📄 Licensing Information</h2>
+                <button class="modal-close-icon" onclick="closeLicensing()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <h3>MIT License</h3>
+
+<p>Copyright (c) 2026 CityUnicorn-Studio</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
+<p><a href="https://github.com/CityUnicorn-Studio/CityUnicorn-Studio/blob/main/LICENSE" target="_blank">click here to view this license</a></p>
+
+      <p style="margin-top: 16px; color: #889988; font-size: 12px;">© 2026 CityUnicorn Studio. Licensed under MIT.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close-modal" onclick="closeLicensing()">Close</button>
+    </div>
+  </div>
+</div>
+
+    <!-- GAME OVER / COMPLETE SCREEN -->
+    <div class="overlay hidden" id="gameOverScreen">
+        <h1 class="caught" id="endTitle">CAUGHT!</h1>
+        <p id="endMessage">The Admin Cat saw your syntax error.</p>
+        <p>Level Reached: <span id="endLevel" style="color: #fff; font-weight: bold;">1</span> / 30</p>
+        <p>Final Score: <span id="endScore" style="color: #00ff41; font-weight: bold;">0</span></p>
+        <button class="btn-game" onclick="startGame()">↺ RETRY PROTOCOL</button>
+    </div>
+
+    <!-- MAIN GAME ENGINE UI -->
+    <div class="header">
+        <div class="title">🔒 STEALTH HTML</div>
+        <div class="stats">
+            <div>LVL: <b id="levelDisplay">1</b>/30</div>
+            <div>SCORE: <b id="scoreDisplay">0</b></div>
+        </div>
+    </div>
+
+    <div class="security-container">
+        <div class="security-label">
+            <span>🐈‍⬛ SECURITY ALERT</span>
+            <span id="securityText">0%</span>
+        </div>
+        <div class="security-bar-bg">
+            <div class="security-bar-fill" id="securityBar"></div>
+        </div>
+    </div>
+
+    <div class="game-area">
+        <div class="mission-box">
+            <div class="mission-label">TARGET INJECTION:</div>
+            <div class="target-code" id="targetCode">&lt;!DOCTYPE html&gt;</div>
+            <div class="tag-tip" id="tagTip">Tells the browser this is an HTML5 document.</div>
+        </div>
+
+        <div class="mission-label">LIVE PREVIEW:</div>
+        <div class="preview-box" id="previewBox"></div>
+
+        <div class="mission-label">YOUR TERMINAL:</div>
+        <div class="input-box" id="inputBox">
+            <span id="typedText"></span><span class="cursor"></span>
+        </div>
+    </div>
+
+    <!-- CUSTOM KEYBOARD LAYOUT -->
+    <div class="keyboard" id="keyboard">
+        <div class="key-row">
+            <div class="key special" data-key="<">&lt;</div>
+            <div class="key special" data-key="!">!</div>
+            <div class="key special" data-key=">">&gt;</div>
+            <div class="key special" data-key="/">/</div>
+            <div class="key special" data-key='"'>"</div>
+            <div class="key special" data-key="=">=</div>
+            <div class="key special" data-key="#">#</div>
+            <div class="key special" data-key=".">.</div>
+            <div class="key special" data-key=":">:</div>
+            <div class="key special" data-key=";">;</div>
+        </div>
+        <div class="key-row">
+            <div class="key special" data-key="1">1</div>
+            <div class="key special" data-key="2">2</div>
+            <div class="key special" data-key="3">3</div>
+            <div class="key special" data-key="4">4</div>
+            <div class="key special" data-key="5">5</div>
+            <div class="key special" data-key="6">6</div>
+            <div class="key special" data-key="7">7</div>
+            <div class="key special" data-key="8">8</div>
+            <div class="key special" data-key="9">9</div>
+            <div class="key special" data-key="0">0</div>
+        </div>
+        <div class="key-row">
+            <div class="key" data-key="q">q</div>
+            <div class="key" data-key="w">w</div>
+            <div class="key" data-key="e">e</div>
+            <div class="key" data-key="r">r</div>
+            <div class="key" data-key="t">t</div>
+            <div class="key" data-key="y">y</div>
+            <div class="key" data-key="u">u</div>
+            <div class="key" data-key="i">i</div>
+            <div class="key" data-key="o">o</div>
+            <div class="key" data-key="p">p</div>
+        </div>
+        <div class="key-row">
+            <div class="key" data-key="a">a</div>
+            <div class="key" data-key="s">s</div>
+            <div class="key" data-key="d">d</div>
+            <div class="key" data-key="f">f</div>
+            <div class="key" data-key="g">g</div>
+            <div class="key" data-key="h">h</div>
+            <div class="key" data-key="j">j</div>
+            <div class="key" data-key="k">k</div>
+            <div class="key" data-key="l">l</div>
+        </div>
+        <div class="key-row">
+            <div class="key" data-key="z">z</div>
+            <div class="key" data-key="x">x</div>
+            <div class="key" data-key="c">c</div>
+            <div class="key" data-key="v">v</div>
+            <div class="key" data-key="b">b</div>
+            <div class="key" data-key="n">n</div>
+            <div class="key" data-key="m">m</div>
+            <div class="key backspace" data-key="back">⌫</div>
+        </div>
+        <div class="key-row">
+            <div class="key space" data-key=" ">SPACE</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        CityUnicorn Studio • Human + <span>Team AI (#gemini & #qwenai ❤️)</span>
+    </div>
+
+<script>
+    /* Global Catch for WebView Logging */
+    window.onerror = function(message, source, lineno, colno, error) {
+        const btn = document.getElementById('startBtn');
+        if (btn) btn.innerText = "CRASH (L" + lineno + "): " + message;
+    };
+
+    /* Particle Animation Generator */
+    const particleContainer = document.getElementById('particle-container');
+
+    function createDroplet() {
+        if (!particleContainer) return;
+        const drop = document.createElement('div');
+        drop.classList.add('droplet');
+
+        const size = Math.random() * 12 + 8;
+        const leftPos = Math.random() * 100;
+        const duration = Math.random() * 5 + 6;
+        const sway = (Math.random() - 0.5) * 60;
+
+        drop.style.width = `${size}px`;
+        drop.style.height = `${size}px`;
+        drop.style.left = `${leftPos}%`;
+        drop.style.animationDuration = `${duration}s`;
+        drop.style.setProperty('--sway-distance', `${sway}px`);
+
+        particleContainer.appendChild(drop);
+        setTimeout(() => { drop.remove(); }, duration * 1000);
+    }
+
+    for (let i = 0; i < 12; i++) {
+        setTimeout(createDroplet, Math.random() * 3000);
+    }
+    setInterval(createDroplet, 600);
+
+    /* Modal Controls */
+    const modal = document.getElementById('licensingModal');
+    function openLicensing() { modal.classList.add('active'); }
+    function closeLicensing() { modal.classList.remove('active'); }
+    function handleOverlayClick(e) { if (e.target === modal) closeLicensing(); }
+
+    /* HTML Levels Data */
+    const levels = [
+        { target: '<!DOCTYPE html>', hint: 'System Init: Declares document as HTML5.' },
+        { target: '<html>', hint: 'System Init: The root element wrapping all page code.' },
+        { target: '<head>', hint: 'Head Section: Holds page metadata & title.' },
+        { target: '<title>Mainframe</title>', hint: 'Page Title: Appears in the browser tab.' },
+        { target: '</head>', hint: 'Closing Tag: Marks the end of the head section.' },
+        { target: '<body>', hint: 'Body Section: Holds all visible content.' },
+        { target: '<h1>Hello World</h1>', hint: 'Heading 1: Top-level header, classic first line!' },
+        { target: '<p>Access Granted</p>', hint: 'Paragraph: Standard text element.' },
+        { target: '</body>', hint: 'Closing Tag: Closes the main body section.' },
+        { target: '</html>', hint: 'System Close: Ends the HTML document.' },
+        { target: '<h2>Security Level</h2>', hint: 'Heading 2: Subheading level.' },
+        { target: '<h3>Substation 04</h3>', hint: 'Heading 3: Minor subheading level.' },
+        { target: '<b>CLASSIFIED</b>', hint: 'Bold: Highlights text with strong weight.' },
+        { target: '<i>Overriding...</i>', hint: 'Italic: Slants text for emphasis.' },
+        { target: '<u>TOP SECRET</u>', hint: 'Underline: Adds underline below text.' },
+        { target: '<hr>', hint: 'Horizontal Line: Creates a visual line divider.' },
+        { target: '<br>', hint: 'Line Break: Moves content down one line.' },
+        { target: '<a href="#">Bypass</a>', hint: 'Anchor Tag: Creates hyperlinks to pages.' },
+        { target: '<img src="cam.jpg">', hint: 'Image Tag: Embeds graphics into pages.' },
+        { target: '<ul>', hint: 'Unordered List: Bulleted list wrapper.' },
+        { target: '<li>Server Node A</li>', hint: 'List Item: An element inside a list.' },
+        { target: '<li>Server Node B</li>', hint: 'List Item: Second element in a list.' },
+        { target: '</ul>', hint: 'Closing Tag: Ends bulleted list.' },
+        { target: '<div class="terminal">', hint: 'Div Tag: Container box for structural layout.' },
+        { target: '<span class="alert">', hint: 'Span Tag: Inline container for small styling.' },
+        { target: '<button>OVERRIDE</button>', hint: 'Button Tag: Interactive clickable element.' },
+        { target: '<input type="text">', hint: 'Input Field: Allows single-line user entry.' },
+        { target: '<input type="password">', hint: 'Input Field: Masks input for secret keying.' },
+        { target: '<p style="color:green;">', hint: 'Inline Style: Direct CSS styling on HTML.' },
+        { target: '<scr'+'ipt>unlock()</scr'+'ipt>', hint: 'Script Tag: Embeds executable JavaScript code.' }
+    ];
+
+    /* Safe Web Audio Context Engine */
+    let audioCtx = null;
+    function initAudio() {
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!audioCtx && AudioContextClass) {
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(e => console.log("Audio resume blocked", e));
+            }
+        } catch (e) {
+            console.log("Audio completely blocked by environment:", e);
+        }
+    }
+    
+    function playSound(type) {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            
+            if (type === 'type') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                osc.start(now); osc.stop(now + 0.04);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'success') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
+                gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'caught') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.5);
+                gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            }
+        } catch(e) {}
+    }
+
+    /* Core Game Loop State */
+    let currentLevel = 0;
+    let score = 0;
+    let security = 0;
+    let typed = '';
+    let isPlaying = false;
+    let securityDecayInterval = null;
+
+    const targetCodeEl = document.getElementById('targetCode');
+    const tagTipEl = document.getElementById('tagTip');
+    const typedTextEl = document.getElementById('typedText');
+    const previewBoxEl = document.getElementById('previewBox');
+    const inputBox = document.getElementById('inputBox');
+    const securityBar = document.getElementById('securityBar');
+    const securityText = document.getElementById('securityText');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const startMenuOverlay = document.getElementById('startMenuOverlay');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const endTitle = document.getElementById('endTitle');
+    const endMessage = document.getElementById('endMessage');
+    const endLevel = document.getElementById('endLevel');
+    const endScore = document.getElementById('endScore');
+
+    function startGame() {
+        startMenuOverlay.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+
+        initAudio();
+
+        currentLevel = 0;
+        score = 0;
+        security = 0;
+        isPlaying = true;
+        
+        loadLevel();
+        startSecurityDecay();
+    }
+
+    function loadLevel() {
+        if (currentLevel >= levels.length) {
+            gameVictory();
+            return;
+        }
+        typed = '';
+        targetCodeEl.innerText = levels[currentLevel].target;
+        tagTipEl.innerText = levels[currentLevel].hint;
+        levelDisplay.innerText = currentLevel + 1;
+        scoreDisplay.innerText = score;
+        updateInputDisplay();
+    }
+
+    function pressKey(key) {
+        if (!isPlaying) return;
+        
+        if (key === 'back') {
+            if (typed.length > 0) {
+                typed = typed.slice(0, -1);
+                playSound('type');
+            }
+        } else {
+            const target = levels[currentLevel].target;
+            const nextCharIndex = typed.length;
+            
+            if (nextCharIndex < target.length && key.toLowerCase() === target[nextCharIndex].toLowerCase()) {
+                typed += target[nextCharIndex]; 
+            } else {
+                typed += key;
+            }
+            playSound('type');
+        }
+        
+        checkInput();
+        updateInputDisplay();
+    }
+
+    function checkInput() {
+        const target = levels[currentLevel].target;
+        
+        if (target.startsWith(typed)) {
+            inputBox.classList.remove('error');
+            inputBox.classList.add('correct');
+            
+            if (typed === target) {
+                levelComplete();
+            }
+        } else {
+            inputBox.classList.remove('correct');
+            inputBox.classList.add('error');
+            playSound('error');
+            document.getElementById('keyboard').classList.add('shake');
+            setTimeout(() => document.getElementById('keyboard').classList.remove('shake'), 300);
+            
+            security += 12;
+            if (security >= 100) {
+                security = 100;
+                gameOver();
+            }
+            updateSecurity();
+        }
+    }
+
+    function updateInputDisplay() {
+        const target = levels[currentLevel].target;
+        let html = '';
+        
+        for (let i = 0; i < typed.length; i++) {
+            if (i < target.length && typed[i] === target[i]) {
+                html += `<span class="char-correct">${escapeHtml(typed[i])}</span>`;
+            } else {
+                html += `<span class="char-wrong">${escapeHtml(typed[i])}</span>`;
+            }
+        }
+        
+        typedTextEl.innerHTML = html;
+        previewBoxEl.innerHTML = typed;
+    }
+
+    function escapeHtml(text) {
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function levelComplete() {
+        playSound('success');
+        score += 100 * (currentLevel + 1);
+        security = Math.max(0, security - 15);
+        currentLevel++;
+        updateSecurity();
+        
+        setTimeout(() => {
+            loadLevel();
+        }, 350);
+    }
+
+    function startSecurityDecay() {
+        if (securityDecayInterval) clearInterval(securityDecayInterval);
+        securityDecayInterval = setInterval(() => {
+            if (!isPlaying) return;
+            if (security > 0) {
+                security = Math.max(0, security - 1.5);
+                updateSecurity();
+            }
+        }, 800);
+    }
+
+    function updateSecurity() {
+        securityBar.style.width = security + '%';
+        securityText.innerText = Math.round(security) + '%';
+        
+        if (security > 70) {
+            securityBar.classList.add('critical');
+        } else {
+            securityBar.classList.remove('critical');
+        }
+    }
+
+    function gameOver() {
+        isPlaying = false;
+        clearInterval(securityDecayInterval);
+        playSound('caught');
+        
+        endTitle.innerText = 'CAUGHT!';
+        endTitle.className = 'caught';
+        endMessage.innerText = 'The Admin Cat saw your syntax error.';
+        endLevel.innerText = currentLevel + 1;
+        endScore.innerText = score;
+        
+        gameOverScreen.classList.remove('hidden');
+    }
+
+    function gameVictory() {
+        isPlaying = false;
+        clearInterval(securityDecayInterval);
+        playSound('success');
+
+        endTitle.innerText = 'MAINFRAME OVERRIDDEN!';
+        endTitle.className = 'success';
+        endMessage.innerText = 'Congratulations! You mastered 30 HTML basics in stealth mode.';
+        endLevel.innerText = '30';
+        endScore.innerText = score;
+
+        gameOverScreen.classList.remove('hidden');
+    }
+
+    /* DEBOUNCED TOUCH & CLICK EVENT DELEGATION */
+    const keyboardEl = document.getElementById('keyboard');
+    let lastKeyTouchTime = 0;
+
+    function handleKeyInput(e) {
+        const now = Date.now();
+        
+        // Prevent ghost click firing right after touchstart
+        if (e.type === 'touchstart') {
+            lastKeyTouchTime = now;
+        } else if (e.type === 'click' && (now - lastKeyTouchTime < 400)) {
+            return;
+        }
+
+        const keyEl = e.target.closest('.key');
+        if (keyEl) {
+            if (e.cancelable && e.type === 'touchstart') e.preventDefault();
+            const keyValue = keyEl.getAttribute('data-key');
+            if (keyValue !== null) pressKey(keyValue);
+        }
+    }
+
+    keyboardEl.addEventListener('touchstart', handleKeyInput, { passive: false });
+    keyboardEl.addEventListener('click', handleKeyInput);
+</script>
+</body>
+</html>

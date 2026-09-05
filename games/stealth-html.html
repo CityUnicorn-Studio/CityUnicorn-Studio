@@ -450,24 +450,18 @@
 
             <div class="modal-body">
                 <h3>MIT License</h3>
-
-<p>Copyright (c) 2026 CityUnicorn-Studio</p>
-
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
-
-<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
-
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
-
-<p><a href="https://github.com/CityUnicorn-Studio/CityUnicorn-Studio/blob/main/LICENSE" target="_blank">click here to view this license</a></p>
-
-      <p style="margin-top: 16px; color: #889988; font-size: 12px;">© 2026 CityUnicorn Studio. Licensed under MIT.</p>
+                <p>Copyright (c) 2026 CityUnicorn-Studio</p>
+                <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+                <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+                <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+                <p><a href="https://github.com/CityUnicorn-Studio/CityUnicorn-Studio/blob/main/LICENSE" target="_blank" style="color: #4da941;">click here to view this license</a></p>
+                <p style="margin-top: 16px; color: #889988; font-size: 12px;">© 2026 CityUnicorn Studio. Licensed under MIT.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-close-modal" onclick="closeLicensing()">Close</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-close-modal" onclick="closeLicensing()">Close</button>
-    </div>
-  </div>
-</div>
 
     <!-- GAME OVER SCREEN -->
     <div class="overlay hidden" id="gameOverScreen">
@@ -475,6 +469,7 @@
         <p id="endMessage">The Admin Cat saw your syntax error.</p>
         <p>Level Reached: <span id="endLevel" style="color: #fff; font-weight: bold;">1</span></p>
         <p>Final Score: <span id="endScore" style="color: #00ff41; font-weight: bold;">0</span></p>
+        <p>High Score: <span id="endHighScore" style="color: #ff8800; font-weight: bold;">0</span></p>
         <p>Max Streak: <span id="endStreak" style="color: #ff8800; font-weight: bold;">0</span></p>
         <button class="btn-game danger" onclick="resetGame()">↺ RETRY PROTOCOL</button>
     </div>
@@ -485,6 +480,7 @@
         <div class="stats">
             <div>LVL: <b id="levelDisplay">1</b></div>
             <div>SCORE: <b id="scoreDisplay">0</b></div>
+            <div>BEST: <b id="highScoreDisplay">0</b></div>
         </div>
     </div>
 
@@ -709,13 +705,14 @@
     let currentLevelIndex = 0;
     let currentTarget = '';
     let score = 0;
+    let highScore = parseInt(localStorage.getItem('stealth_highScore')) || 0; // Add High Score
     let security = 0;
     let typed = '';
     let isPlaying = false;
     let isEndlessMode = false;
     let codesTyped = 0;
     let streak = 0;
-    let maxStreak = 0;
+    let maxStreak = parseInt(localStorage.getItem('stealth_maxStreak')) || 0; // Load saved Best Streak
     let securityDecayInterval = null;
 
     const targetCodeEl = document.getElementById('targetCode');
@@ -732,6 +729,7 @@
     const endMessage = document.getElementById('endMessage');
     const endLevel = document.getElementById('endLevel');
     const endScore = document.getElementById('endScore');
+    const endHighScore = document.getElementById('endHighScore');
     const endStreak = document.getElementById('endStreak');
 
     function toggleFullscreen() {
@@ -753,7 +751,7 @@
         typed = '';
         codesTyped = 0;
         streak = 0;
-        maxStreak = 0;
+        // REMOVED: maxStreak = 0;  <-- Keeping your record saved!
         isEndlessMode = false;
         isPlaying = true;
         
@@ -860,10 +858,22 @@
         playSound('success');
         codesTyped++;
         streak++;
-        if (streak > maxStreak) maxStreak = streak;
+        
+        // Save new Best Streak
+        if (streak > maxStreak) {
+            maxStreak = streak;
+            localStorage.setItem('stealth_maxStreak', maxStreak);
+        }
         
         let points = isEndlessMode ? 50 : 100 * (currentLevelIndex + 1);
         score += points;
+
+        // Save new High Score
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('stealth_highScore', highScore);
+        }
+
         security = Math.max(0, security - 20);
         
         showNotification(`✅ ${isEndlessMode ? 'Challenge' : 'Level ' + (currentLevelIndex + 1)} Complete! +${points} XP`);
@@ -899,6 +909,9 @@
         document.getElementById('totalLevels').innerText = hackingLevels.length;
         document.getElementById('streak').innerText = streak;
         document.getElementById('maxStreak').innerText = maxStreak;
+        
+        const highScoreEl = document.getElementById('highScoreDisplay');
+        if (highScoreEl) highScoreEl.innerText = highScore;
     }
 
     function showNotification(message) {
@@ -924,6 +937,10 @@
         endMessage.innerText = 'The Admin Cat saw your syntax error.';
         endLevel.innerText = isEndlessMode ? '∞' : (currentLevelIndex + 1);
         endScore.innerText = score;
+        
+        const endHighScoreEl = document.getElementById('endHighScore');
+        if (endHighScoreEl) endHighScoreEl.innerText = highScore;
+        
         endStreak.innerText = maxStreak;
         
         gameOverScreen.classList.remove('hidden');
@@ -951,4 +968,4 @@
     });
 </script>
 </body>
-</html>
+    </html>

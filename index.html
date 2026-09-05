@@ -6,6 +6,10 @@
   <meta name="description" content="CityUnicorn Vault — your vault of awesome HTML5 browser games." />
   <meta name="theme-color" content="#0b0a1a" />
   <title>CityUnicorn Vault 🦄</title>
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     /* ---------- Reset & Base ---------- */
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -150,6 +154,58 @@
     .footer-bottom { border-top: 1px solid var(--border); text-align: center; padding: 1.5rem 1rem; color: var(--text-dim); font-size: 0.85rem; }
     .qwen-badge { display: inline-block; margin-top: 0.5rem; padding: 0.3rem 0.8rem; background: rgba(199, 125, 255, 0.1); border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); font-weight: 600; font-size: 0.8rem; }
 
+    /* ---------- REVIEWS MODAL STYLES ---------- */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(11, 10, 26, 0.85);
+      backdrop-filter: blur(8px); display: flex; align-items: center;
+      justify-content: center; z-index: 10000; padding: 1rem; opacity: 0;
+      pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      background: var(--card); border: 1px solid var(--accent);
+      border-radius: var(--radius); width: 100%; max-width: 550px;
+      max-height: 85vh; display: flex; flex-direction: column;
+      box-shadow: var(--glow-intense); overflow: hidden;
+      transform: scale(0.9); transition: transform 0.3s ease;
+    }
+    .modal-overlay.active .modal-card { transform: scale(1); }
+    .modal-header {
+      padding: 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .close-modal { background: none; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; }
+    .close-modal:hover { color: var(--accent-3); }
+    .modal-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+    
+    .review-form { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; background: var(--bg-soft); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); }
+    .form-row { display: flex; gap: 0.5rem; }
+    .vault-input, .vault-select, .vault-textarea {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.6rem 0.8rem; color: var(--text);
+      font-family: var(--font); font-size: 0.9rem; outline: none; flex: 1;
+    }
+    .vault-input:focus, .vault-select:focus, .vault-textarea:focus { border-color: var(--accent); }
+    .btn-review-submit {
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+      color: #0b0a1a; font-weight: 700; border: none; padding: 0.7rem;
+      border-radius: 8px; cursor: pointer; transition: transform 0.1s;
+    }
+    .btn-review-submit:active { transform: scale(0.98); }
+    .btn-reviews-open {
+      background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+      padding: 0.5rem 0.8rem; border-radius: 999px; font-weight: 600; font-size: 0.8rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-reviews-open:hover { border-color: var(--accent-2); color: var(--accent-2); }
+    .reviews-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .review-item { background: var(--bg-soft); border: 1px solid var(--border); padding: 0.8rem 1rem; border-radius: 8px; }
+    .review-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem; }
+    .review-author { color: var(--accent-3); font-weight: 700; }
+    .review-stars { color: #ffd700; }
+    .review-text { font-size: 0.9rem; color: var(--text); word-break: break-word; }
+
     /* ---------- Responsive ---------- */
     @media (max-width: 768px) {
       .nav { display: none; }
@@ -171,7 +227,7 @@
     <div class="container header-inner">
       <div class="logo-wrapper">
         <a href="#" class="logo">
-          <span class="logo-mark"></span>
+          <span class="logo-mark">🦄</span>
           <span class="logo-text">CityUnicorn <em>Vault</em></span>
         </a>
         <span class="creator-badge"><span class="star">✨</span> By CityUnicorn</span>
@@ -192,7 +248,7 @@
       <p class="subtitle">A handpicked vault of HTML5 browser games — no installs, just click and play.</p>
       <div class="search-wrap">
         <input id="searchInput" type="search" placeholder="Search games by name, tag, or category…" aria-label="Search games" autocomplete="off" />
-        <span class="search-icon" aria-hidden="true"></span>
+        <span class="search-icon" aria-hidden="true">🔍</span>
       </div>
       <div class="filter-chips" id="filterChips">
         <button class="chip active" data-category="all">All</button>
@@ -218,7 +274,7 @@
 
   <!-- Games grid -->
   <main class="container" id="games">
-    <h2 class="section-title"> The Vault</h2>
+    <h2 class="section-title">🎮 The Vault</h2>
     <p class="result-count" id="resultCount">Loading games...</p>
     <div class="games-grid" id="gamesGrid"></div>
     <p class="empty-state" id="emptyState" hidden>No games match your search. Try a different keyword 🦄</p>
@@ -261,6 +317,36 @@
     </div>
   </footer>
 
+  <!-- REVIEWS MODAL CONTAINER -->
+  <div class="modal-overlay" id="reviewsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalGameTitle">💬 Game Reviews</h3>
+        <button class="close-modal" onclick="closeReviewsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form class="review-form" id="reviewForm">
+          <div class="form-row">
+            <input type="text" id="reviewNickname" class="vault-input" placeholder="Your Handle/Nickname" required maxlength="25">
+            <select id="reviewRating" class="vault-select">
+              <option value="5">⭐⭐⭐⭐⭐</option>
+              <option value="4">⭐⭐⭐⭐</option>
+              <option value="3">⭐⭐⭐</option>
+              <option value="2">⭐⭐</option>
+              <option value="1">⭐</option>
+            </select>
+          </div>
+          <textarea id="reviewComment" class="vault-textarea" placeholder="Write feedback or high score tips..." required rows="3" maxlength="300"></textarea>
+          <button type="submit" class="btn-review-submit" id="reviewSubmitBtn">Post Review</button>
+        </form>
+
+        <div class="reviews-list" id="modalReviewsList">
+          <div style="text-align: center; color: var(--text-dim);">Loading reviews...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // CityUnicorn Vault V5 — The Auto-Pilot Edition
     
@@ -272,7 +358,7 @@
       { id: 4,  title: "Dragon Quest",      emoji: "🐉", category: "adventure",desc: "Embark on a quest through magical lands.",  tags: ["rpg", "fantasy", "quest"], url: "#" },
       { id: 5,  title: "Space Shooter",     emoji: "🚀", category: "action",   desc: "Defend the galaxy from incoming waves.",     tags: ["shoot", "space", "arcade"], url: "#" },
       { id: 6,  title: "Tower Defense",     emoji: "🏰", category: "strategy", desc: "Build towers, stop the horde.",             tags: ["defense", "tactics", "build"], url: "#" },
-      { id: 7,  title: "Snake Rewind",      emoji: "", category: "arcade",   desc: "The classic snake — with a neon twist.",     tags: ["classic", "retro", "snake"], url: "#" },
+      { id: 7,  title: "Snake Rewind",      emoji: "🐍", category: "arcade",   desc: "The classic snake — with a neon twist.",     tags: ["classic", "retro", "snake"], url: "#" },
       { id: 8,  title: "Memory Match",      emoji: "🃏", category: "puzzle",   desc: "Flip cards and find the matching pairs.",    tags: ["memory", "cards", "brain"], url: "#" },
       { id: 9,  title: "Pixel Knight",      emoji: "⚔️", category: "action",   desc: "Slash through dungeons pixel by pixel.",     tags: ["pixel", "sword", "dungeon"], url: "#" },
       { id: 10, title: "Unicorn Run",       emoji: "🦄", category: "adventure",desc: "Run, jump, and sparkle through dreams.",     tags: ["platformer", "cute", "run"], url: "#" },
@@ -280,10 +366,9 @@
       { id: 12, title: "Maze Runner",       emoji: "🌀", category: "puzzle",   desc: "Find your way out of shifting mazes.",      tags: ["maze", "logic", "escape"], url: "#" },
     ];
 
-    //  AUTOMATION CONFIGURATION
-    // The "Epoch" date. The cycle starts here. (Today: Aug 17, 2026)
+    // AUTOMATION CONFIGURATION
     const EPOCH_DATE = new Date('2026-08-17T00:00:00'); 
-    const WEEK_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
     let activeCategory = "all";
     let searchQuery = "";
@@ -299,19 +384,12 @@
 
     yearEl.textContent = new Date().getFullYear();
 
-    // 🤖 AUTO-SCHEDULING LOGIC
     function getScheduleData() {
       const now = new Date();
-      // Calculate how many full weeks have passed since the epoch
       const weeksElapsed = Math.floor((now - EPOCH_DATE) / WEEK_MS);
-      
-      // Determine current and next featured game indices (cycling through the array)
-      // We offset by 9 so that index 0 starts with "Unicorn Run" (id: 10) for continuity!
       const startIndex = 9; 
       const currentIdx = (startIndex + weeksElapsed) % games.length;
       const nextIdx = (startIndex + weeksElapsed + 1) % games.length;
-      
-      // Calculate exactly when the next week begins for the countdown
       const nextResetDate = new Date(EPOCH_DATE.getTime() + (weeksElapsed + 1) * WEEK_MS);
       
       return {
@@ -321,7 +399,6 @@
       };
     }
 
-    // Render Featured Game
     function renderFeaturedGame() {
       const schedule = getScheduleData();
       const featured = schedule.current;
@@ -343,9 +420,10 @@
             </span>
           </div>
           <div class="next-up">Next week: <span>${schedule.next.emoji} ${schedule.next.title}</span></div>
-          <button class="play-featured-btn" onclick="launchGame(${featured.id})">
-            Play Now ▶
-          </button>
+          <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="play-featured-btn" style="margin-top:0;" onclick="launchGame(${featured.id})">Play Now ▶</button>
+            <button class="btn-reviews-open" style="padding: 0.8rem 1.2rem; font-size: 0.9rem;" onclick="event.stopPropagation(); openReviewsModal(${featured.id}, '${featured.title}')">💬 Reviews</button>
+          </div>
         </div>
       `;
       
@@ -367,7 +445,6 @@
         document.getElementById('minsLeft').textContent = mins;
         document.getElementById('secsLeft').textContent = secs;
       } else {
-        // If it hits zero, refresh the schedule immediately
         renderFeaturedGame();
       }
     }
@@ -403,7 +480,10 @@
             <p class="game-desc">${game.desc}</p>
             <div class="game-meta">
               <span class="game-tag">${game.category}</span>
-              <button class="play-btn" type="button" onclick="event.stopPropagation(); launchGame(${game.id})">Play ▶</button>
+              <div style="display:flex; gap:0.4rem;">
+                <button class="btn-reviews-open" type="button" onclick="event.stopPropagation(); openReviewsModal(${game.id}, '${game.title}')">💬</button>
+                <button class="play-btn" type="button" onclick="event.stopPropagation(); launchGame(${game.id})">Play ▶</button>
+              </div>
             </div>
           </div>
         </article>
@@ -434,11 +514,96 @@
       if (navigator.vibrate) navigator.vibrate(isFrenzy ? [50, 50, 50] : 30);
     });
 
+    // --- SUPABASE & REVIEWS INTEGRATION ---
+    const SUPABASE_URL = 'https://otkcaapoalzovjdzopwe.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a2NhYXBvYWx6b3ZqZHpvcHdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MTE1NzUsImV4cCI6MjEwNDE4NzU3NX0.T3GenatNppku14OAKjACWWcww3TjhZV7PRZKdbHzK9U';
+    const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    let activeReviewGameId = null;
+
+    async function openReviewsModal(gameId, title) {
+      activeReviewGameId = gameId;
+      document.getElementById('modalGameTitle').textContent = `💬 Reviews: ${title}`;
+      document.getElementById('reviewsModal').classList.add('active');
+      fetchReviewsForGame(gameId);
+    }
+
+    function closeReviewsModal() {
+      document.getElementById('reviewsModal').classList.remove('active');
+      activeReviewGameId = null;
+    }
+
+    async function fetchReviewsForGame(gameId) {
+      const listEl = document.getElementById('modalReviewsList');
+      if (!db) {
+        listEl.innerHTML = `<div style="text-align:center; color: var(--text-dim);">Supabase configuration missing.</div>`;
+        return;
+      }
+      
+      listEl.innerHTML = `<div style="text-align:center; color: var(--text-dim);">Loading...</div>`;
+
+      const { data, error } = await db
+        .from('vault_reviews')
+        .select('*')
+        .eq('game_id', String(gameId))
+        .order('created_at', { ascending: false });
+
+      if (error || !data) {
+        listEl.innerHTML = `<div style="text-align:center; color: #ff5555;">Could not load reviews.</div>`;
+        return;
+      }
+
+      if (data.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center; color: var(--text-dim); padding: 1rem;">No reviews yet. Be the first to review!</div>`;
+        return;
+      }
+
+      listEl.innerHTML = data.map(item => `
+        <div class="review-item">
+          <div class="review-meta">
+            <span class="review-author">${escapeHtml(item.nickname)}</span>
+            <span class="review-stars">${'★'.repeat(item.rating)}${'☆'.repeat(5 - item.rating)}</span>
+          </div>
+          <div class="review-text">${escapeHtml(item.comment)}</div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!activeReviewGameId || !db) return;
+
+      const btn = document.getElementById('reviewSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Posting...';
+
+      const nickname = document.getElementById('reviewNickname').value.trim();
+      const rating = parseInt(document.getElementById('reviewRating').value);
+      const comment = document.getElementById('reviewComment').value.trim();
+
+      const { error } = await db.from('vault_reviews').insert([
+        { game_id: String(activeReviewGameId), nickname, rating, comment }
+      ]);
+
+      btn.disabled = false;
+      btn.textContent = 'Post Review';
+
+      if (error) {
+        alert('Error posting review: ' + error.message);
+      } else {
+        document.getElementById('reviewComment').value = '';
+        fetchReviewsForGame(activeReviewGameId);
+      }
+    });
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+    }
+
     // Initialize
     renderFeaturedGame();
     renderGames();
     
-    // Tick the countdown every second
     setInterval(() => {
       const schedule = getScheduleData();
       updateCountdown(schedule.resetDate);
